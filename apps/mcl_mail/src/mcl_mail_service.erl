@@ -38,15 +38,6 @@
 %% `start/2' runs, so nothing can inject it later. A sibling put two of three
 %% fleet nodes into a boot-crash loop this exact way.
 -export([store_id/0, data_dir/0]).
-%% ==========================================================================
-%% AND A READ MODEL, alongside the store
-%% ==========================================================================
-%%
-%% `project_mailboxes' writes the letter read model into this barrel_docdb
-%% database and `query_mailboxes' reads it, both through mcl_om:read_model/0.
-%% mcl_om:boot/1 opens it at data_dir/read_model_id before start/1 fires.
--export([read_model_id/0]).
-
 info() ->
     #{name => <<"mcl-mail">>,
       version => <<"0.1.0">>,
@@ -124,6 +115,3 @@ chosen(false) -> "/tmp/mcl_mail";
 chosen("") -> "/tmp/mcl_mail";
 chosen(Path) -> Path.
 
-%% @doc The barrel_docdb database the letter read model lives in.
--spec read_model_id() -> binary().
-read_model_id() -> <<"mcl_mail">>.

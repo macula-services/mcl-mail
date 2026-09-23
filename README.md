@@ -22,6 +22,7 @@ Seven request-and-reply procedures, served under the org `mcl-mail`:
 
 A refusal comes back as the call's error with a short reason: `no_caller`,
 `invalid_to_citizen_did`, `not_initiated`, `already_initiated`, `already_open`,
+`archived`,
 `mailbox_not_opened`, `mailbox_closed`, `mailbox_archived`, `letter_not_found`,
 `letter_archived`, `missing_letter_id`, `not_found`, `replied_but_not_delivered`.
 
@@ -70,9 +71,9 @@ no client needs them. Marking a letter read is folded into the two reads.
 
     scripts/health.sh                      # against a running node
 
-Building the image needs a Rust toolchain, because macula ships a QUIC NIF and
-the alpine build compiles it from source rather than fetching one linked against
-a different libc.
+The build needs librocksdb 11.1.2 (see "The images, and rocksdb" below), so run
+these inside `ghcr.io/macula-io/macula-ci-otp-rocksdb`, the image CI uses. The
+image build brings its own:
 
     podman build -t mcl-mail -f Containerfile .
 
@@ -88,7 +89,9 @@ a different libc.
 | `MCL_NODE_NAME` | `mcl_mail` | Erlang node name. |
 | `MCL_NODE_HOST` | `127.0.0.1` | Erlang node host. |
 | `MCL_COOKIE` | `mcl_mail` | Erlang cookie. |
-| `MCL_DATA_DIR` | `/tmp/mcl_mail` | Where the store (`mcl_mail_store/`) and the read model (`mcl_mail/`) live. The compose file sets `/data` and mounts a volume there. |
+| `MCL_DATA_DIR` | `/data` in the image | Where the store (`mcl_mail_store/`), the read model (`mcl_mail/`) and barrel_docdb's system database (`barrel_docdb/`) live. The compose file mounts a host directory there. |
+| `MCL_SERVICE_NAME` | `mcl-mail` | Label on the boot claim the realm's operator sees on the Providers desk. |
+| `MCL_BOX` | empty | Label naming the host, also on the boot claim. Set it where you deploy. |
 
 `deploy/docker-compose.yml` runs it, and carries what the service knows about
 itself. If you deploy through something else, let that carry **placement**: which
@@ -125,11 +128,17 @@ nobody is watching, and the eunit suite guards the attribute itself.
 
 ### The store and the read model
 
-The service owns a `reckon-db` store, `mcl_mail_store`, and a barrel_docdb read
-model, `mcl_mail`. It exports `store_id/0`, `data_dir/0` and `read_model_id/0`,
-so `mcl_om:boot/1` opens both, and the store's evoq subscription, before
-`start/1` fires. `config/sys.config.src` carries the `evoq` adapter block that
-boot requires.
+The service owns a `reckon-db` store, `mcl_mail_store`: it exports `store_id/0`
+and `data_dir/0`, so `mcl_om:boot/1` opens the store and its evoq subscription
+before `start/1` fires, and `config/sys.config.src` carries the `evoq` adapter
+block that boot requires.
+
+The letter read model is barrel_docdb's database `mcl_mail`, and it belongs to
+the PRJ department: `project_mailboxes` opens it when it starts, before its
+projection runs, because mcl_om replays the store into the projection at boot.
+barrel_docdb's own system database, which records where each database lives,
+is pinned to the data volume in `config/sys.config.src`; its default is
+`/tmp/barrel_data`, inside the container.
 
 ⚠ **The store id is written in two places**, `store_id/0` and the `evoq` block,
 and nothing makes them agree by itself. A test compares them, along with a
@@ -140,6 +149,16 @@ it the mail lives inside the container and every recreate destroys it, which is
 the same as not keeping any.
 
 The store is node-local: one node serves the mail it holds.
+
+### The images, and rocksdb
+
+barrel_docdb brings the erlang rocksdb binding. The override in `rebar.config`
+links the system librocksdb 11.1.2 instead of compiling the copy it bundles, so
+the image builds in `ghcr.io/macula-io/macula-ci-otp-rocksdb` and runs on
+`ghcr.io/macula-io/macula-pq-runtime-rocksdb`, both Debian trixie and pinned by
+digest, and CI runs in the same build image. Building outside them stops at
+"Could not find RocksDB" unless your machine has that library. A test holds the
+three digests, the override and the OTP release checks in place.
 
 ## Licence
 

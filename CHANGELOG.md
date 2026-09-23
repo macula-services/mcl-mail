@@ -7,6 +7,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- On `mcl_om` 0.27, which no longer brings `barrel_docdb`. The service declares
+  it itself, and `project_mailboxes` opens the letter read model when it starts,
+  before its projection runs.
+- barrel_docdb's system database lives on the data volume. Its default,
+  `/tmp/barrel_data`, is inside the container.
+- rocksdb links the system librocksdb (`-DWITH_SYSTEM_ROCKSDB=ON`) instead of
+  compiling its bundled copy. The image builds in `macula-ci-otp-rocksdb` and
+  runs on `macula-pq-runtime-rocksdb` (Debian trixie), CI runs in the same build
+  image, all pinned by digest. It used to build and run on alpine.
+- The boot claim carries `MCL_SERVICE_NAME=mcl-mail` and the deploying host's
+  `MCL_BOX`, which the realm's Providers desk shows.
+
 ### Added
 
 - The mailbox service on macula 12 and `mcl_om` 0.26.5: seven procedures under

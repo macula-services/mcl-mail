@@ -177,18 +177,16 @@ the_data_directory_is_answerable_test() ->
 %% re-pushed tag cannot change what builds), lint's image and the release its
 %% toolchain step insists on, .tool-versions, and this VM.
 the_runtime_agrees_between_the_image_the_ci_and_this_vm_test() ->
-    Image = pinned("Containerfile",
-                   "^FROM docker\\.io/(?:hexpm/)?erlang:([0-9]+\\.[0-9]+\\.[0-9]+)"
-                   "-alpine[^@\\s]*@sha256:[0-9a-f]{64} AS builder$"),
-    CiImage = pinned(".github/workflows/lint.yml",
-                     "^\\s+image: docker\\.io/(?:hexpm/)?erlang:([0-9]+\\.[0-9]+\\.[0-9]+)"
-                     "[^@\\s]*@sha256:[0-9a-f]{64}$"),
-    CiCheck = pinned(".github/workflows/lint.yml",
-                     "\\{<<\"([0-9]+\\.[0-9]+\\.[0-9]+)\">>, true\\} -> halt\\(0\\);"),
+    %% The rocksdb pair's tags name a date, not a release, so the builder and
+    %% lint each assert the release in a check step; this compares those, the
+    %% .tool-versions pin and this VM.
+    Check = "\\{<<\"([0-9]+\\.[0-9]+\\.[0-9]+)\">>, true\\} -> halt\\(0\\);",
+    Image = pinned("Containerfile", Check),
+    CiCheck = pinned(".github/workflows/lint.yml", Check),
     Tools = pinned(".tool-versions", "^erlang ([0-9]+\\.[0-9]+\\.[0-9]+)$"),
     %% Sorted and deduplicated, so a failure prints every version rather than
     %% the first pair that happened to be compared.
-    ?assertEqual([Image], lists:usort([Image, CiImage, CiCheck, Tools, running_otp()])).
+    ?assertEqual([Image], lists:usort([Image, CiCheck, Tools, running_otp()])).
 
 %% The full release, 28.4.3 and not 28: `otp_release' names only the major.
 running_otp() ->
@@ -220,9 +218,58 @@ found(false, _Candidate, Dir, Name, Left) ->
 %% The read model the QRY desks read through
 %%==============================================================================
 
-%% mcl_om opens the barrel_docdb database at data_dir/read_model_id before
-%% start/1, and `mailboxes_read_model' addresses it through mcl_om:read_model/0.
-%% barrel_docdb refuses a name outside [a-z0-9_-]{1,63}.
+%% barrel_docdb refuses a database name outside [a-z0-9_-]{1,63}.
 the_read_model_has_a_name_barrel_docdb_accepts_test() ->
-    Name = ?SERVICE:read_model_id(),
-    ?assertMatch({match, _}, re:run(Name, "^[a-z0-9_-]{1,63}$")).
+    ?assertMatch({match, _}, re:run(mailboxes_read_model:db(), "^[a-z0-9_-]{1,63}$")).
+
+%%==============================================================================
+%% mcl_om 0.27: the read model is ours, barrel on the volume, rocksdb linked
+%%==============================================================================
+
+%% barrel_docdb keeps its system database (`_barrel_system') under its own
+%% `data_dir' app env, which defaults to /tmp/barrel_data: inside the container,
+%% gone on every recreate, and with it the record of where the read model lives.
+%% It goes on the data volume, beside the store and the read model.
+barrel_system_db_is_on_the_data_volume_test() ->
+    {ok, Text} = file:read_file(alongside("config/sys.config.src")),
+    ?assertMatch({match, _},
+                 re:run(Text, <<"\\{barrel_docdb, \\[\\{data_dir, +\"\\$\\{MCL_DATA_DIR\\}/barrel_docdb\"\\}\\]\\}">>)),
+    ?assertMatch({match, _},
+                 re:run(Text, <<"\\{project_mailboxes, \\[\\{data_dir, +\"\\$\\{MCL_DATA_DIR\\}\"\\}\\]\\}">>)).
+
+%% barrel_docdb brings the erlang rocksdb binding, whose compile pre_hook would
+%% build the RocksDB it bundles: tens of minutes of CPU per CI run and image
+%% build. The override links the librocksdb in macula-ci-otp-rocksdb instead.
+%% An override replaces the whole key, so the binding's clean hooks must come
+%% along or `rebar3 clean' leaves a stale NIF behind.
+rocksdb_links_the_system_library_test() ->
+    {ok, Terms} = file:consult(alongside("rebar.config")),
+    [Opts] = [O || {override, rocksdb, O} <- proplists:get_value(overrides, Terms, [])],
+    Hooks = proplists:get_value(pre_hooks, Opts, []),
+    [Cmd] = [C || {"(linux|darwin|solaris)", compile, C} <- Hooks],
+    ?assertMatch({match, _}, re:run(Cmd, "^\\./do_cmake\\.sh -DWITH_SYSTEM_ROCKSDB=ON ")),
+    ?assertNotEqual(nomatch, string:find(Cmd, "$ERLANG_ROCKSDB_OPTS")),
+    ?assert(lists:member({clean, "rm -f priv/*.so"}, Hooks)),
+    ?assert(lists:member({clean, "rm -rf _build/cmake"}, Hooks)).
+
+%% Build, CI and runtime are the team's rocksdb pair, named by digest: a release
+%% built against librocksdb 11.1.2 needs librocksdb.so.11 at run time, which
+%% only the runtime image of the pair carries.
+images_are_the_digest_pinned_rocksdb_pair_test() ->
+    Digest = "@sha256:[0-9a-f]{64}",
+    ?assertMatch(<<_/binary>>,
+                 pinned("Containerfile",
+                        "^FROM (ghcr\\.io/macula-io/macula-ci-otp-rocksdb)" ++ Digest ++ " AS builder$")),
+    ?assertMatch(<<_/binary>>,
+                 pinned("Containerfile",
+                        "^FROM (ghcr\\.io/macula-io/macula-pq-runtime-rocksdb)" ++ Digest ++ "$")),
+    ?assertMatch(<<_/binary>>,
+                 pinned(".github/workflows/lint.yml",
+                        "^\\s+image: (ghcr\\.io/macula-io/macula-ci-otp-rocksdb)" ++ Digest ++ "$")).
+
+%% Every node that claims on the realm shows its service and host on the
+%% Providers desk: mcl_om 0.27 reads MCL_SERVICE_NAME and MCL_BOX.
+the_claim_names_the_service_and_its_box_test() ->
+    {ok, Text} = file:read_file(alongside("deploy/docker-compose.yml")),
+    ?assertMatch({match, _}, re:run(Text, <<"- MCL_SERVICE_NAME=mcl-mail\\n">>)),
+    ?assertMatch({match, _}, re:run(Text, <<"- MCL_BOX=\\$\\{MCL_BOX:-\\}\\n">>)).

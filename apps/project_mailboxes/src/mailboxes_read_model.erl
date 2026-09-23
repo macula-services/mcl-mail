@@ -1,8 +1,8 @@
 %%% @doc The letter read model every QRY desk reads through directly --
 %%% `project_mailboxes' writes here, `query_mailboxes' reads here,
 %%% neither ever touches `barrel_docdb' any other way. One document per
-%%% letter, keyed by `{citizen_did, letter_id}', stored in the
-%%% database `mcl_mail_service:read_model_id/0' names.
+%%% letter, keyed by `{citizen_did, letter_id}', in the barrel_docdb
+%%% database `mcl_mail', which project_mailboxes opens when it starts.
 %%%
 %%% Booleans (`read'/`archived') are plain Erlang terms here -- this is
 %%% internal storage, not a mesh wire payload, so the org's "no bool on
@@ -11,8 +11,28 @@
 %%% @end
 -module(mailboxes_read_model).
 
+-define(DB, <<"mcl_mail">>).
+
+-export([open/1, db/0]).
 -export([upsert_deposited/2, mark_read/2, mark_replied/2, mark_archived/2]).
 -export([find/2, list_unarchived/1, to_wire/1]).
+
+%% @doc Open the read model under `DataDir', creating it on first boot and
+%% reopening it after a restart. barrel_docdb's own system database is placed
+%% by its app env (config/sys.config.src puts it on the data volume); this
+%% places the read model itself.
+-spec open(file:filename_all()) -> ok.
+open(DataDir) ->
+    Dir = filename:join(DataDir, binary_to_list(?DB)),
+    ok = filelib:ensure_path(Dir),
+    opened(barrel_docdb:create_db(?DB, #{data_dir => Dir})).
+
+opened({ok, _Pid}) -> ok;
+opened({error, already_exists}) -> ok.
+
+%% @doc The read model's database name.
+-spec db() -> binary().
+db() -> ?DB.
 
 -spec upsert_deposited(binary(), map()) -> ok.
 upsert_deposited(CitizenDid, #{letter_id := LetterId} = Fields)
@@ -63,8 +83,7 @@ find(CitizenDid, LetterId) ->
 %% if a real citizen's mailbox ever makes this fold slow.
 -spec list_unarchived(binary()) -> [map()].
 list_unarchived(CitizenDid) ->
-    {ok, DbName} = mcl_om:read_model(),
-    {ok, Rows} = barrel_docdb:fold_docs(DbName, fun(Doc, Acc) -> collect(CitizenDid, Doc, Acc) end, []),
+    {ok, Rows} = barrel_docdb:fold_docs(?DB, fun(Doc, Acc) -> collect(CitizenDid, Doc, Acc) end, []),
     lists:sort(fun newer_unread_first/2, Rows).
 
 collect(CitizenDid, #{<<"citizen_did">> := CitizenDid, <<"archived">> := false} = Doc, Acc) ->
@@ -112,10 +131,8 @@ doc_id(CitizenDid, LetterId) ->
     <<(binary:encode_hex(CitizenDid, lowercase))/binary, ":", LetterId/binary>>.
 
 get_doc(Id) ->
-    {ok, DbName} = mcl_om:read_model(),
-    barrel_docdb:get_doc(DbName, Id).
+    barrel_docdb:get_doc(?DB, Id).
 
 put(Doc) ->
-    {ok, DbName} = mcl_om:read_model(),
-    {ok, _} = barrel_docdb:put_doc(DbName, Doc),
+    {ok, _} = barrel_docdb:put_doc(?DB, Doc),
     ok.

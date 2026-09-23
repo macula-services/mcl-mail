@@ -67,9 +67,14 @@ services:
       - MCL_COOKIE=mcl_mail
       # Host networking means a port already bound on this host fails SILENTLY.
       - MCL_HEALTH_PORT=8496
-      # Where the mail lands, matching the volume above. mcl_om appends the
-      # names: the store is at /data/mcl_mail_store, the read model at
-      # /data/mcl_mail.
+      # Labels on the claim this service sends the realm at boot, which the
+      # realm's operator sees on the Providers desk: what is asking, and from
+      # which box. MCL_BOX comes from the host that deploys it.
+      - MCL_SERVICE_NAME=mcl-mail
+      - MCL_BOX=${MCL_BOX:-}
+      # Where the mail lands, matching the volume above: the store at
+      # /data/mcl_mail_store, the read model at /data/mcl_mail, and
+      # barrel_docdb's system database at /data/barrel_docdb.
       - MCL_DATA_DIR=/data
 
 # The identity volume, NAMED HERE rather than left to the project name, so a
