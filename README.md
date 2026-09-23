@@ -2,21 +2,71 @@
 
 **Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now**
 
-## Status: scaffold
+## What it does
 
-The service boots, joins the mesh and answers `/health` on 8496. It
-does nothing else yet.
+A citizen (a person, an agent or a service, anything with a macula node
+identity) keeps a mailbox here. Anyone can leave a letter in it while the
+citizen is offline; the citizen reads, replies and archives when they are back.
 
-It announces no capability and asks the realm for no authority, because it can do
-nothing yet. Both lists grow when the thing they name exists. Advertising a
-capability before it exists puts a lie on the mesh where another service can find
-it and call it.
+Seven request-and-reply procedures, served under the org `mcl-mail`:
+
+| Procedure | Payload | Reply | Acts on |
+|-----------|---------|-------|---------|
+| `mcl-mail/initiate_mailbox` | none | `#{}` | the caller's mailbox comes into being |
+| `mcl-mail/open_mailbox` | none | `#{}` | the caller's mailbox starts receiving mail |
+| `mcl-mail/deposit_letter` | `to_citizen_did` (64 hex), `subject`, `body`, optional `reply_letter_id` | `letter_id` | the recipient's mailbox; the sender is the caller |
+| `mcl-mail/reply_to_letter` | `letter_id`, `subject`, `body` | `letter_id` | marks the letter answered in the caller's mailbox, deposits the reply with the original sender |
+| `mcl-mail/archive_letter` | `letter_id` | `letter_id` | the caller's mailbox |
+| `mcl-mail/get_mailbox` | none | `letters`, unread first | the caller's unarchived letters, marked read once fetched |
+| `mcl-mail/get_letter` | `letter_id` | `letter` | one of the caller's letters, marked read once fetched |
+
+A refusal comes back as the call's error with a short reason: `no_caller`,
+`invalid_to_citizen_did`, `not_initiated`, `already_initiated`, `already_open`,
+`mailbox_not_opened`, `mailbox_closed`, `mailbox_archived`, `letter_not_found`,
+`letter_archived`, `missing_letter_id`, `not_found`, `replied_but_not_delivered`.
+
+A letter goes out as `letter_id`, `from_did` (64 hex), `subject`, `body`,
+`deposited_at` (unix ms), `read`, `replied`, `archived` (each 0 or 1), and
+`reply_letter_id` when it answers another. Text is CBOR text, never bytes.
+
+### Who a call acts as
+
+**Every procedure acts as the CALL's caller.** macula 12 puts `caller` on each
+inbound CALL: the node id of the identity key that signed the request, verified
+by every station on the path and again by this provider, and written over any
+`caller` the payload sends. A citizen's DID is that same node id. So a citizen
+can only open, read, reply from and archive in their own mailbox, and a letter's
+`from_did` is whoever signed the deposit, never something they typed. No
+separate ownership proof is needed, and none is accepted.
+
+A deposit needs the recipient's mailbox to be initiated and open. Nothing
+opens a mailbox on a citizen's behalf, so a stranger cannot bring a mailbox into
+being for somebody who never asked for one.
+
+### How it is built
+
+An umbrella of four apps, one per department:
+
+- `guide_mailbox_lifecycle` (CMD): the mailbox aggregate, one event-sourced
+  stream per citizen (`mailbox-<128-bit digest of the DID>`), in the reckon-db
+  store `mcl_mail_store`. Nine desks: initiate, open, close, archive and
+  unarchive a mailbox; deposit, mark read, reply to and archive a letter.
+  Status is bit flags (`mailbox_status.hrl`). The five CMD responders live
+  beside their desks.
+- `project_mailboxes` (PRJ): `letter_lifecycle_to_mailboxes` projects the four
+  letter events into a barrel_docdb read model, one document per letter.
+- `query_mailboxes` (QRY): `get_mailbox` and `get_letter`, read from that model.
+- `mcl_mail`: the `mcl_om_service` contract.
+
+close, archive and unarchive a mailbox are tested desks with no procedure yet:
+no client needs them. Marking a letter read is folded into the two reads.
 
 ## Running it
 
     rebar3 compile
     rebar3 eunit
     rebar3 lint
+    rebar3 dialyzer
 
     scripts/health.sh                      # against a running node
 
@@ -38,6 +88,7 @@ a different libc.
 | `MCL_NODE_NAME` | `mcl_mail` | Erlang node name. |
 | `MCL_NODE_HOST` | `127.0.0.1` | Erlang node host. |
 | `MCL_COOKIE` | `mcl_mail` | Erlang cookie. |
+| `MCL_DATA_DIR` | `/tmp/mcl_mail` | Where the store (`mcl_mail_store/`) and the read model (`mcl_mail/`) live. The compose file sets `/data` and mounts a volume there. |
 
 `deploy/docker-compose.yml` runs it, and carries what the service knows about
 itself. If you deploy through something else, let that carry **placement**: which
@@ -72,25 +123,23 @@ Six callbacks in `mcl_mail_service`, all required, all resolved **by name** by
 attribute turns a missing one into a compile error rather than an `undef` where
 nobody is watching, and the eunit suite guards the attribute itself.
 
-### The store
+### The store and the read model
 
-This service was scaffolded with `store=1`, so it owns a `reckon-db` store called
-`mcl_mail_store`. `store_id/0` and `data_dir/0` are exported, `mcl_om:boot/1`
-opens the store and its evoq subscription before `start/1` fires, and
-`config/sys.config.src` carries the `evoq` adapter block that boot requires.
+The service owns a `reckon-db` store, `mcl_mail_store`, and a barrel_docdb read
+model, `mcl_mail`. It exports `store_id/0`, `data_dir/0` and `read_model_id/0`,
+so `mcl_om:boot/1` opens both, and the store's evoq subscription, before
+`start/1` fires. `config/sys.config.src` carries the `evoq` adapter block that
+boot requires.
 
 ⚠ **The store id is written in two places**, `store_id/0` and the `evoq` block,
-and nothing makes them agree by itself. A generated test compares them, along
-with a second one asserting the `evoq` block is present at all. Keep both.
+and nothing makes them agree by itself. A test compares them, along with a
+second one asserting the `evoq` block is present at all. Keep both.
 
 ⚠ **`deploy/docker-compose.yml` mounts a volume, and on a node it must.** Without
-it the record lives inside the container and every recreate destroys it, which is
-the same as not keeping one.
+it the mail lives inside the container and every recreate destroys it, which is
+the same as not keeping any.
 
-The store is node-local. To make it span every node running the same `store_id`,
-export the optional `store_mode/0` callback returning `cluster`, and `mcl_om`
-starts it with reckon-db discovery and Ra clustering. It is not generated,
-because `single` is the default and a scaffold should not decide that for you.
+The store is node-local: one node serves the mail it holds.
 
 ## Licence
 

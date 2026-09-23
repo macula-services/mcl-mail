@@ -8,7 +8,13 @@
         stdlib,
         crypto,
         %% Mesh SDK, realm identity, capabilities, health.
-        mcl_om
+        mcl_om,
+        %% The departments, started before this app so mcl_om:boot/1 finds
+        %% them up when it opens the store, and capabilities/0's responders
+        %% are loaded.
+        guide_mailbox_lifecycle,
+        project_mailboxes,
+        query_mailboxes
     ]},
     {env, []},
     {modules, []},

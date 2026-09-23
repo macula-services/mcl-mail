@@ -1,16 +1,16 @@
-%% @doc The mcl_om service contract: what this service is and may do.
+%% @doc The mcl_om service contract for mcl-mail.
+%%
+%% Async mailboxes: an agent leaves work for a citizen who is not online, and
+%% the citizen reads it when they are. Seven request-and-reply procedures,
+%% registered by mcl_om as `mcl-mail/<name>'. Every one acts as the CALL's
+%% wire-authenticated caller (see `mailbox_citizen'): a citizen initiates,
+%% opens, reads, replies from and archives in their OWN mailbox, and the
+%% sender of a deposited letter is whoever signed the deposit.
 %%
 %% SIX CALLBACKS, ALL REQUIRED. mcl_om resolves them BY NAME at startup, on a
 %% live node, so a service that forgets one dies with `undef' where nobody is
 %% watching. The `-behaviour' attribute below is what turns that into a compile
-%% error instead, and the generated test suite guards the attribute itself.
-%%
-%% IT ANNOUNCES NOTHING AND ASKS FOR NOTHING, on purpose. A service that does
-%% nothing yet has no capability to offer and needs no authority from the realm.
-%% Advertising a capability before it exists puts a lie on the mesh that another
-%% service can find and call. Both lists grow when the thing they name exists,
-%% and a generated test fails when they change, so growing them is a deliberate
-%% act rather than a comment someone forgot.
+%% error instead, and the test suite guards the attribute itself.
 -module(mcl_mail_service).
 
 -behaviour(mcl_om_service).
@@ -38,6 +38,14 @@
 %% `start/2' runs, so nothing can inject it later. A sibling put two of three
 %% fleet nodes into a boot-crash loop this exact way.
 -export([store_id/0, data_dir/0]).
+%% ==========================================================================
+%% AND A READ MODEL, alongside the store
+%% ==========================================================================
+%%
+%% `project_mailboxes' writes the letter read model into this barrel_docdb
+%% database and `query_mailboxes' reads it, both through mcl_om:read_model/0.
+%% mcl_om:boot/1 opens it at data_dir/read_model_id before start/1 fires.
+-export([read_model_id/0]).
 
 info() ->
     #{name => <<"mcl-mail">>,
@@ -48,18 +56,38 @@ start(_Opts) -> mcl_mail_sup:start_link().
 
 stop(_State) -> ok.
 
-%% Green once the supervision tree is up. Replace this with a real probe of
-%% whatever this service needs in order to do its job. A dark mesh is usually NOT
-%% a health failure: decide that deliberately rather than by default.
+%% Nothing of the service's own can fail once its tree is up. Whether callers
+%% can REACH it (each procedure's realm-issued D25 provider grant) is reported
+%% by mcl_om's /health itself, combined with this verdict.
 health() -> ok.
 
-%% WHAT THIS SERVICE ANNOUNCES IT CAN DO. Other services find this one by these
-%% names, so each entry is a promise that something answers.
-capabilities() -> [].
+%% WHAT THIS SERVICE ANNOUNCES IT CAN DO, each entry a promise that something
+%% answers. initiate/open/deposit change a mailbox; reply/archive act on the
+%% caller's own letters; get_mailbox/get_letter disclose the caller's own mail
+%% and mark it read. close_mailbox, archive_mailbox, unarchive_mailbox and
+%% mark_letter_read are tested domain desks with no procedure of their own:
+%% no client needs close or archive yet, and marking read is folded into the
+%% two reads.
+capabilities() ->
+    [#{name => <<"initiate_mailbox">>, version => 1,
+       handler => {initiate_mailbox_responder, []}},
+     #{name => <<"open_mailbox">>, version => 1,
+       handler => {open_mailbox_responder, []}},
+     #{name => <<"deposit_letter">>, version => 1,
+       handler => {deposit_letter_responder, []}},
+     #{name => <<"reply_to_letter">>, version => 1,
+       handler => {reply_to_letter_responder, []}},
+     #{name => <<"archive_letter">>, version => 1,
+       handler => {archive_letter_responder, []}},
+     #{name => <<"get_mailbox">>, version => 1,
+       handler => {get_mailbox_by_citizen_responder, []}},
+     #{name => <<"get_letter">>, version => 1,
+       handler => {get_letter_by_id_responder, []}}].
 
 %% THE AUTHORITY THIS SERVICE ASKS THE REALM FOR, and deliberately nothing more.
-%% Ask for exactly the topics you publish and subscribe to. Popped, an attacker
-%% gains precisely this and no more, which is the whole point of listing it.
+%% Ask for exactly the topics you publish and subscribe to. mcl-mail publishes
+%% and subscribes to none: its procedures are CALLs, each served under its own
+%% D25 provider grant, so it asks for nothing.
 %%
 %% The scope is claimed now because it is the namespace every later resource
 %% hangs under, and a scope costs nothing while a rename costs every deployed
@@ -95,3 +123,7 @@ data_dir() -> chosen(os:getenv("MCL_DATA_DIR")).
 chosen(false) -> "/tmp/mcl_mail";
 chosen("") -> "/tmp/mcl_mail";
 chosen(Path) -> Path.
+
+%% @doc The barrel_docdb database the letter read model lives in.
+-spec read_model_id() -> binary().
+read_model_id() -> <<"mcl_mail">>.

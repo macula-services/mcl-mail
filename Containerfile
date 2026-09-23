@@ -2,10 +2,9 @@
 #
 # Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now
 #
-# NO DATA VOLUME AS GENERATED. The scaffold writes nothing, and a named volume
-# for data that does not exist is a promise the image cannot keep. Add one
-# together with the code that writes it, and declare it here and in the compose
-# file at the same time.
+# THE MAIL LIVES UNDER MCL_DATA_DIR (the reckon-db store and the read model),
+# and deploy/docker-compose.yml mounts a host directory there. Without that
+# mount every recreate destroys every mailbox.
 
 # ⚠ THE RUNTIME IS PINNED IN TWO PLACES AND THEY MUST AGREE: here and `lint.yml'
 # beside it. A generated service that builds on one release and tests on another

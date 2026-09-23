@@ -58,11 +58,24 @@ info_version_matches_the_application_test() ->
 health_is_green_test() ->
     ?assertEqual(ok, ?SERVICE:health()).
 
-%% An empty list is the correct answer for a service that does nothing yet. The
-%% assertion is here so that adding a capability breaks a test and makes someone
-%% write down what the service can now actually do.
-announces_no_capability_yet_test() ->
-    ?assertEqual([], ?SERVICE:capabilities()).
+%% The seven procedures, served as `mcl-mail/<name>' (the org comes from
+%% config). The assertion is here so that adding or dropping one breaks a test
+%% and makes someone write down what the service can now actually do.
+announces_the_seven_mailbox_procedures_test() ->
+    ?assertEqual([<<"initiate_mailbox">>, <<"open_mailbox">>, <<"deposit_letter">>,
+                  <<"reply_to_letter">>, <<"archive_letter">>, <<"get_mailbox">>,
+                  <<"get_letter">>],
+                 [maps:get(name, C) || C <- ?SERVICE:capabilities()]).
+
+%% Every procedure is request and reply, answered by a module that exists and
+%% implements macula_response.
+every_procedure_is_answered_by_a_response_handler_test_() ->
+    [?_assert(lists:member(macula_response, behaviours(Handler)))
+     || #{handler := {Handler, _Args}} <- ?SERVICE:capabilities()].
+
+behaviours(Module) ->
+    {module, Module} = code:ensure_loaded(Module),
+    lists:append([B || {behaviour, B} <- Module:module_info(attributes)]).
 
 identity_spec_has_the_shape_mcl_om_expects_test() ->
     #{scope := Scope, actions := Actions,
@@ -72,18 +85,17 @@ identity_spec_has_the_shape_mcl_om_expects_test() ->
     ?assert(is_list(Resources)),
     ?assert(is_integer(Ttl) andalso Ttl > 0).
 
-%% A resource this service is not authorised for is a publish the realm would
-%% refuse once UCAN delegation lands. Asking for nothing and claiming nothing
-%% must stay in step, so the two are asserted together.
-authority_matches_what_is_announced_test() ->
+%% The authority is for topics published and subscribed to, and mcl-mail does
+%% neither: every procedure is a CALL, whose serving grant (D25) the realm
+%% issues per procedure and mcl_om reports on /health. So it asks for nothing.
+asks_the_realm_for_no_topic_authority_test() ->
     #{actions := Actions, resources := Resources} = ?SERVICE:identity_spec(),
-    ?assertEqual([], ?SERVICE:capabilities()),
     ?assertEqual([], Actions),
     ?assertEqual([], Resources).
 
-%% The supervisor starts and stops cleanly on its own, without mcl_om. It has
-%% no children as generated; this asserts the tree is startable, not that it does
-%% any work.
+%% The supervisor starts and stops cleanly on its own, without mcl_om. The
+%% departments supervise their own processes, so the service's tree has no
+%% children; this asserts it is startable, not that it does any work.
 supervisor_starts_and_stops_test() ->
     {ok, Pid} = mcl_mail_sup:start_link(),
     ?assert(is_process_alive(Pid)),
@@ -203,3 +215,14 @@ climb(Dir, Name, Left) ->
 found(true, Candidate, _Dir, _Name, _Left) -> Candidate;
 found(false, _Candidate, Dir, Name, Left) ->
     climb(filename:dirname(Dir), Name, Left - 1).
+
+%%==============================================================================
+%% The read model the QRY desks read through
+%%==============================================================================
+
+%% mcl_om opens the barrel_docdb database at data_dir/read_model_id before
+%% start/1, and `mailboxes_read_model' addresses it through mcl_om:read_model/0.
+%% barrel_docdb refuses a name outside [a-z0-9_-]{1,63}.
+the_read_model_has_a_name_barrel_docdb_accepts_test() ->
+    Name = ?SERVICE:read_model_id(),
+    ?assertMatch({match, _}, re:run(Name, "^[a-z0-9_-]{1,63}$")).

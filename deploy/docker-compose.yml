@@ -67,8 +67,9 @@ services:
       - MCL_COOKIE=mcl_mail
       # Host networking means a port already bound on this host fails SILENTLY.
       - MCL_HEALTH_PORT=8496
-      # Where the store lands, matching the volume above. `store_id/0' is
-      # appended by mcl_om, so the store itself is at /data/mcl_mail_store.
+      # Where the mail lands, matching the volume above. mcl_om appends the
+      # names: the store is at /data/mcl_mail_store, the read model at
+      # /data/mcl_mail.
       - MCL_DATA_DIR=/data
 
 # The identity volume, NAMED HERE rather than left to the project name, so a

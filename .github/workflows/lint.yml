@@ -83,3 +83,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
       - run: rebar3 lint
       - run: rebar3 eunit
+      # The responders hand payload terms to the CMD desks and the read model
+      # to barrel_docdb; dialyzer is what notices a contract drifting between
+      # them, so it gates alongside the tests.
+      - run: rebar3 dialyzer
