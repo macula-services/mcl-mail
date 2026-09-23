@@ -1,0 +1,17 @@
+{application, mcl_mail, [
+    {description, "Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now"},
+    {vsn, "0.1.0"},
+    {registered, [mcl_mail_sup]},
+    {mod, {mcl_mail_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        crypto,
+        %% Mesh SDK, realm identity, capabilities, health.
+        mcl_om
+    ]},
+    {env, []},
+    {modules, []},
+    {licenses, ["Apache-2.0"]},
+    {links, [{"GitHub", "https://github.com/macula-services/mcl-mail"}]}
+]}.
