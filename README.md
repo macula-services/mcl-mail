@@ -62,6 +62,11 @@ An umbrella of four apps, one per department:
 close, archive and unarchive a mailbox are tested desks with no procedure yet:
 no client needs them. Marking a letter read is folded into the two reads.
 
+Like every mcl service, it also answers `mcl-mail/info`, which mcl_om adds: its
+name, version and description, its org and claim labels, node id, the macula
+and mcl_om versions, uptime, the health word and the procedures it advertises.
+Open to any mesh caller, public facts only.
+
 ## Running it
 
     rebar3 compile
