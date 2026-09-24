@@ -273,3 +273,15 @@ the_claim_names_the_service_and_its_box_test() ->
     {ok, Text} = file:read_file(alongside("deploy/docker-compose.yml")),
     ?assertMatch({match, _}, re:run(Text, <<"- MCL_SERVICE_NAME=mcl-mail\\n">>)),
     ?assertMatch({match, _}, re:run(Text, <<"- MCL_BOX=\\$\\{MCL_BOX:-\\}\\n">>)).
+
+%% The image says which commit IT was built from. Without its own label it
+%% inherited the base image's (macula-ci-images' own commit), which names the
+%% wrong repository; build-push passes the sha, the runtime stage labels it.
+the_image_carries_its_revision_test() ->
+    ?assertEqual(<<"REVISION">>, pinned("Containerfile", "^ARG (REVISION)=unknown$")),
+    ?assertEqual(<<"${REVISION}">>,
+                 pinned("Containerfile",
+                        "^LABEL org\\.opencontainers\\.image\\.revision=\"([^\"]+)\"$")),
+    ?assertEqual(<<"${{ github.sha }}">>,
+                 pinned(".github/workflows/build-push.yml", "^\\s+REVISION=(.+)$")).
+
