@@ -296,6 +296,33 @@ only_main_publishes_latest_test() ->
                         "\\s+echo \"tags=[^\\n]*:latest\" >> \"\\$GITHUB_OUTPUT\"\\n"
                         "\\s+else\\n(?:\\s+#[^\\n]*\\n)*\\s+echo [^\\n]*>&2\\n\\s+(exit 1)\\n\\s+fi$")).
 
+%% SIGNED BY DIGEST: build-push hands the pushed digest to macula-ci-images'
+%% attest-image.yml, pinned by full commit (the signing identity is that file
+%% at that ref), which signs it keylessly and attests its SBOM and provenance.
+%% macula-fleet's reconciler checks that before it runs the image; an unsigned
+%% digest runs only while a box is in audit (mail 0.1.0 shipped without it).
+the_image_is_signed_by_the_pinned_attest_workflow_test() ->
+    ?assertMatch(<<_/binary>>,
+                 pinned(".github/workflows/build-push.yml",
+                        "^\\s+uses: macula-io/macula-ci-images/\\.github/workflows/attest-image\\.yml@([0-9a-f]{40})$")),
+    ?assertEqual(<<"ghcr.io/macula-services/mcl-mail">>,
+                 pinned(".github/workflows/build-push.yml", "^\\s+image: (ghcr\\.io/macula-services/mcl-mail)$")),
+    ?assertEqual(<<"needs.build-and-push.outputs.digest">>,
+                 pinned(".github/workflows/build-push.yml", "^\\s+digest: \\$\\{\\{ (needs\\.build-and-push\\.outputs\\.digest) \\}\\}$")).
+
+%% Every action a workflow runs is pinned by full commit: a tag moves.
+every_action_is_pinned_by_commit_test() ->
+    Unpinned = [{W, U} || W <- [".github/workflows/build-push.yml", ".github/workflows/lint.yml"],
+                          U <- uses(W), nomatch =:= re:run(U, <<"@[0-9a-f]{40}$">>)],
+    ?assertEqual([], Unpinned).
+
+uses(Workflow) ->
+    {ok, Text} = file:read_file(alongside(Workflow)),
+    case re:run(Text, <<"^\\s+(?:-\\s+)?uses:\\s+(\\S+)">>, [multiline, global, {capture, all_but_first, binary}]) of
+        {match, Found} -> [U || [U] <- Found];
+        nomatch -> []
+    end.
+
 %% The example runs an image by DIGEST, in the shape the fleet's compose files
 %% in macula-fleet use: the repository fixed here, the digest from MCL_MAIL_IMAGE_DIGEST, no tag to drift and no watchtower
 %% to recreate the container behind the fleet's back.
