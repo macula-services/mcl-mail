@@ -60,8 +60,9 @@
         {realm_key,         <<"${MCL_REALM_KEY}">>},
         %% ⚠ MAIL IS NOTHING WITHOUT THE MESH. With `required' (mcl_om 0.33.1)
         %% a boot missing MCL_REALM, MCL_REALM_KEY, MACULA_STATION_SEEDS or
-        %% MACULA_STATION_NODE_IDS stops and names each one, where `optional'
-        %% boots a green node that answers /health and nothing else.
+        %% MACULA_STATION_NODE_IDS stops and names each one. Under `optional' an
+        %% unset seed list boots a green node that answers /health and nothing
+        %% else, and the other three stop without naming the setting.
         {mesh,              required}
     ]},
     %% ==========================================================================
