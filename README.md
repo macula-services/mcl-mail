@@ -32,7 +32,7 @@ A letter goes out as `letter_id`, `from_did` (64 hex), `subject`, `body`,
 
 ### Who a call acts as
 
-**Every procedure acts as the CALL's caller.** macula 12 puts `caller` on each
+**Every procedure acts as the CALL's caller.** macula puts `caller` on each
 inbound CALL: the node id of the identity key that signed the request, verified
 by every station on the path and again by this provider, and written over any
 `caller` the payload sends. A citizen's DID is that same node id. So a citizen
@@ -88,7 +88,7 @@ image build brings its own:
 |----------|---------|---------|
 | `MCL_REALM` | required | 64-hex realm tag, the `sha256` of the realm's name. No default: a service that guesses its realm announces itself where nobody can attribute it. |
 | `MCL_REALM_KEY` | required | The realm's public signing key, hex encoded: the **trust anchor**, not an identifier. Every org-namespaced advertisement is verified against it, so without it nothing resolves, the boot claim never reaches the realm, and the service stays green while unreachable. Public material, not a secret. |
-| `MACULA_STATION_SEEDS` | required | Station hosts to dial, `host[:port]`, comma-separated. No default: naming a realm costs nothing, dialling a production station from every dev clone does. |
+| `MACULA_STATION_SEEDS` | required | Station hosts to dial, `host[:port]`, comma-separated. No default: naming a realm costs nothing, dialling a fleet station from every dev clone does. |
 | `MACULA_STATION_NODE_IDS` | required | The matching 64-hex station node ids, comma-separated, index-paired with the seeds. The dial is pinned (D5): mcl_om refuses to boot a pool with an unpinned seed. |
 | `MCL_HEALTH_PORT` | `8496` | Health endpoint. Host networking makes a collision a silent bind failure, so check the host before changing.  |
 | `MCL_NODE_NAME` | `mcl_mail` | Erlang node name. |
@@ -97,19 +97,24 @@ image build brings its own:
 | `MCL_DATA_DIR` | `/data` in the image | Where the store (`mcl_mail_store/`), the read model (`mcl_mail/`) and barrel_docdb's system database (`barrel_docdb/`) live. The compose file mounts a host directory there. |
 | `MCL_SERVICE_NAME` | `mcl-mail` | Label on the boot claim the realm's operator sees on the Providers desk. |
 | `MCL_BOX` | empty | Label naming the host, also on the boot claim. Set it where you deploy. |
+| `MCL_MAIL_IMAGE_DIGEST` | required by the compose file | `sha256:<digest>` of the released image to run. The compose file runs the image by digest, never by tag. |
 
-`deploy/docker-compose.yml` runs it, and carries what the service knows about
-itself. If you deploy through something else, let that carry **placement**: which
+`deploy/docker-compose.yml` runs it, a minimal runnable example that carries
+what the service knows about itself. The fleet runs its own compose for this
+service (macula-fleet `edge/scripts/docker-compose.mcl-mail.yml`), in the same
+shape. If you deploy through something else, let that carry **placement**: which
 host, which station, which realm, which secret store. Keeping the two apart is
 what stops a config table in a README and the real environment drifting.
 
 ## Deployment
 
-The image has two channels. A push to `main` publishes
-`ghcr.io/macula-services/mcl-mail:latest`, the deploy channel: a host that follows
-`:latest` deploys every merge. A `v*` tag publishes its own version and nothing
-else, the rollback archive: pin a host to one to roll back. A push that changes
-only documentation builds no image (`scripts/is_image_push.sh`).
+A `v*` tag publishes `ghcr.io/macula-services/mcl-mail:<version>` and nothing
+else: a release. The fleet runs a release **by digest**: macula-fleet pins the
+digest the tag produced and reconciles the box to it, so a new image reaches a
+box only when its pin is bumped, and rolling back is pinning an earlier digest. A
+push to `main` publishes `:latest`, the tip of main to try; nothing on the fleet
+follows it. A push that changes only documentation builds no image
+(`scripts/is_image_push.sh`).
 
 The service's org, the `<org>` in every procedure it offers (`<org>/<name>`), is
 this repository's name, fixed in `config/sys.config.src`. The realm's grant names
@@ -143,7 +148,7 @@ the PRJ department: `project_mailboxes` opens it when it starts, before its
 projection runs, because mcl_om replays the store into the projection at boot.
 barrel_docdb's own system database, which records where each database lives,
 is pinned to the data volume in `config/sys.config.src`; its default is
-`/tmp/barrel_data`, inside the container.
+`data/barrel_docdb` in the working directory, `/app/data` inside the container.
 
 ⚠ **The store id is written in two places**, `store_id/0` and the `evoq` block,
 and nothing makes them agree by itself. A test compares them, along with a
@@ -161,9 +166,10 @@ barrel_docdb brings the erlang rocksdb binding. The override in `rebar.config`
 links the system librocksdb 11.1.2 instead of compiling the copy it bundles, so
 the image builds in `ghcr.io/macula-io/macula-ci-otp-rocksdb` and runs on
 `ghcr.io/macula-io/macula-pq-runtime-rocksdb`, both Debian trixie and pinned by
-digest, and CI runs in the same build image. Building outside them stops at
+their shared dated tag and digest, and CI runs in the same build image. Building outside them stops at
 "Could not find RocksDB" unless your machine has that library. A test holds the
-three digests, the override and the OTP release checks in place.
+three pins (one publication, the same builder in CI), the override and the OTP
+release checks in place.
 
 ## Licence
 
