@@ -35,8 +35,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   it itself, and `project_mailboxes` opens the letter read model when it starts,
   before its projection runs.
 - barrel_docdb's system database lives on the data volume. Its default,
-  `data/barrel_docdb` in the working directory (`/app/data`), is inside the
-  container.
+  `data/barrel_docdb` relative to the working directory
+  (`/app/data/barrel_docdb`), is inside the container.
 - rocksdb links the system librocksdb (`-DWITH_SYSTEM_ROCKSDB=ON`) instead of
   compiling its bundled copy. The image builds in `macula-ci-otp-rocksdb` and
   runs on `macula-pq-runtime-rocksdb` (Debian trixie), CI runs in the same build

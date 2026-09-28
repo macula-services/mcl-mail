@@ -24,8 +24,7 @@ open() ->
     %% Its system database under the test cache, as sys.config.src puts it on
     %% the data volume, set before barrel_docdb starts and opens it.
     _ = application:load(barrel_docdb),
-    ok = application:set_env(barrel_docdb, data_dir,
-                             filename:join(filename:basedir(user_cache, "mcl-mail-test"), "barrel_docdb")),
+    ok = application:set_env(barrel_docdb, data_dir, barrel_dir()),
     {ok, _} = application:ensure_all_started(barrel_docdb),
     Dir = filename:join(filename:basedir(user_cache, "mcl-mail-test"),
                         integer_to_list(erlang:system_time(microsecond)) ++ "_" ++
@@ -41,7 +40,11 @@ close(Dir) ->
 %% barrel_docdb's own default for its system database is `data/barrel_docdb',
 %% relative to wherever the test runs, which is the repository.
 barrel_keeps_its_system_database_out_of_the_working_tree(_Dir) ->
-    ?_assertNot(filelib:is_dir("data/barrel_docdb")).
+    [?_assertNot(filelib:is_dir("data/barrel_docdb")),
+     ?_assert(filelib:is_dir(filename:join(barrel_dir(), "_barrel_system")))].
+
+barrel_dir() ->
+    filename:join(filename:basedir(user_cache, "mcl-mail-test"), "barrel_docdb").
 
 deposit(LetterId, At) ->
     ok = mailboxes_read_model:upsert_deposited(?ALICE, #{letter_id => LetterId, from_did => ?BOB,

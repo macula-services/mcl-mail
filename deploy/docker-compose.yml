@@ -10,9 +10,10 @@
 #     MACULA_STATION_NODE_IDS=<64-hex node id of that station> \
 #     docker compose -p mcl-mail -f deploy/docker-compose.yml up -d
 #
-# A MINIMAL RUNNABLE EXAMPLE. The fleet runs its own compose for this service
-# (macula-fleet edge/scripts/docker-compose.mcl-mail.yml) in the same shape: the
-# image by digest, the digest from the box's committed config env.
+# A MINIMAL RUNNABLE EXAMPLE. The fleet deploys services from its own compose
+# files in macula-fleet, in the same shape as this one: the image by digest, the
+# digest from the box's committed config env (mcl-tube's, for one, reads
+# MCL_TUBE_IMAGE_DIGEST from <box>/mcl-tube-config.env).
 #
 # IF YOU DEPLOY THROUGH SOMETHING ELSE, keep this file anyway and let the other
 # thing carry PLACEMENT: which host, which station, which realm, which secret
