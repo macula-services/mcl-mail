@@ -227,7 +227,8 @@ the_read_model_has_a_name_barrel_docdb_accepts_test() ->
 %%==============================================================================
 
 %% barrel_docdb keeps its system database (`_barrel_system') under its own
-%% `data_dir' app env, which defaults to /tmp/barrel_data: inside the container,
+%% `data_dir' app env, which defaults to data/barrel_docdb in the working
+%% directory (/app/data): inside the container,
 %% gone on every recreate, and with it the record of where the read model lives.
 %% It goes on the data volume, beside the store and the read model.
 barrel_system_db_is_on_the_data_volume_test() ->
@@ -252,20 +253,20 @@ rocksdb_links_the_system_library_test() ->
     ?assert(lists:member({clean, "rm -f priv/*.so"}, Hooks)),
     ?assert(lists:member({clean, "rm -rf _build/cmake"}, Hooks)).
 
-%% Build, CI and runtime are the team's rocksdb pair, named by digest: a release
-%% built against librocksdb 11.1.2 needs librocksdb.so.11 at run time, which
-%% only the runtime image of the pair carries.
-images_are_the_digest_pinned_rocksdb_pair_test() ->
-    Digest = "@sha256:[0-9a-f]{64}",
-    ?assertMatch(<<_/binary>>,
-                 pinned("Containerfile",
-                        "^FROM (ghcr\\.io/macula-io/macula-ci-otp-rocksdb)" ++ Digest ++ " AS builder$")),
-    ?assertMatch(<<_/binary>>,
-                 pinned("Containerfile",
-                        "^FROM (ghcr\\.io/macula-io/macula-pq-runtime-rocksdb)" ++ Digest ++ "$")),
-    ?assertMatch(<<_/binary>>,
-                 pinned(".github/workflows/lint.yml",
-                        "^\\s+image: (ghcr\\.io/macula-io/macula-ci-otp-rocksdb)" ++ Digest ++ "$")).
+%% Build, CI and runtime are the team's rocksdb pair, named by its dated tag AND
+%% its digest, so neither can drift: a release built against librocksdb 11.1.2
+%% needs librocksdb.so.11 at run time, which only the runtime image of the pair
+%% carries. The pair is published together, so builder and runtime share their
+%% tag, and CI builds in exactly the builder the image does.
+images_are_the_dated_and_digest_pinned_rocksdb_pair_test() ->
+    Pin = ":([0-9]{8}-[0-9]{4}@sha256:[0-9a-f]{64})",
+    Builder = pinned("Containerfile", "^FROM ghcr\\.io/macula-io/macula-ci-otp-rocksdb" ++ Pin ++ " AS builder$"),
+    Runtime = pinned("Containerfile", "^FROM ghcr\\.io/macula-io/macula-pq-runtime-rocksdb" ++ Pin ++ "$"),
+    Ci = pinned(".github/workflows/lint.yml", "^\\s+image: ghcr\\.io/macula-io/macula-ci-otp-rocksdb" ++ Pin ++ "$"),
+    ?assertEqual(Builder, Ci),
+    ?assertEqual(tag(Builder), tag(Runtime)).
+
+tag(Pin) -> hd(binary:split(Pin, <<"@">>)).
 
 %% Every node that claims on the realm shows its service and host on the
 %% Providers desk: mcl_om 0.27 reads MCL_SERVICE_NAME and MCL_BOX.
@@ -273,6 +274,18 @@ the_claim_names_the_service_and_its_box_test() ->
     {ok, Text} = file:read_file(alongside("deploy/docker-compose.yml")),
     ?assertMatch({match, _}, re:run(Text, <<"- MCL_SERVICE_NAME=mcl-mail\\n">>)),
     ?assertMatch({match, _}, re:run(Text, <<"- MCL_BOX=\\$\\{MCL_BOX:-\\}\\n">>)).
+
+%% The example runs an image by DIGEST, as the fleet's own compose does
+%% (macula-fleet edge/scripts/docker-compose.mcl-mail.yml): the repository fixed
+%% here, the digest from MCL_MAIL_IMAGE_DIGEST, no tag to drift and no watchtower
+%% to recreate the container behind the fleet's back.
+the_example_runs_an_image_by_digest_test() ->
+    {ok, Text} = file:read_file(alongside("deploy/docker-compose.yml")),
+    ?assertMatch({match, _},
+                 re:run(Text, <<"^\\s+image: ghcr\\.io/macula-services/mcl-mail@\\$\\{MCL_MAIL_IMAGE_DIGEST:\\?[^}]+\\}$">>,
+                        [multiline])),
+    ?assertEqual(nomatch, re:run(Text, <<":latest">>)),
+    ?assertEqual(nomatch, re:run(Text, <<"watchtower">>)).
 
 %% The image says which commit IT was built from. Without its own label it
 %% inherited the base image's (macula-ci-images' own commit), which names the

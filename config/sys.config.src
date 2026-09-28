@@ -5,8 +5,9 @@
 [
     %% ⚠ ON THE DATA VOLUME. barrel_docdb keeps its system database, which
     %% records where each database lives, under its own data_dir, and the
-    %% default is /tmp/barrel_data: inside the container, gone on every
-    %% recreate. A test pins this line.
+    %% default (its app env) is data/barrel_docdb relative to the working
+    %% directory, /app/data inside the container: gone on every recreate. A
+    %% test pins this line.
     {barrel_docdb, [{data_dir, "${MCL_DATA_DIR}/barrel_docdb"}]},
     %% The letter read model, opened by project_mailboxes when it starts, at
     %% <data_dir>/mcl_mail. The same directory the store lives under.

@@ -14,12 +14,18 @@
 
 store_test_() ->
     {foreach, fun open/0, fun close/1,
-     [fun a_deposited_letter_is_listed_unread_and_found/1,
+     [fun barrel_keeps_its_system_database_out_of_the_working_tree/1,
+      fun a_deposited_letter_is_listed_unread_and_found/1,
       fun a_read_letter_is_listed_after_the_unread_ones/1,
       fun an_archived_letter_is_found_but_not_listed/1,
       fun reopening_an_existing_read_model_is_fine/1]}.
 
 open() ->
+    %% Its system database under the test cache, as sys.config.src puts it on
+    %% the data volume, set before barrel_docdb starts and opens it.
+    _ = application:load(barrel_docdb),
+    ok = application:set_env(barrel_docdb, data_dir,
+                             filename:join(filename:basedir(user_cache, "mcl-mail-test"), "barrel_docdb")),
     {ok, _} = application:ensure_all_started(barrel_docdb),
     Dir = filename:join(filename:basedir(user_cache, "mcl-mail-test"),
                         integer_to_list(erlang:system_time(microsecond)) ++ "_" ++
@@ -31,6 +37,11 @@ close(Dir) ->
     ok = barrel_docdb:delete_db(mailboxes_read_model:db()),
     _ = file:del_dir_r(Dir),
     ok.
+
+%% barrel_docdb's own default for its system database is `data/barrel_docdb',
+%% relative to wherever the test runs, which is the repository.
+barrel_keeps_its_system_database_out_of_the_working_tree(_Dir) ->
+    ?_assertNot(filelib:is_dir("data/barrel_docdb")).
 
 deposit(LetterId, At) ->
     ok = mailboxes_read_model:upsert_deposited(?ALICE, #{letter_id => LetterId, from_did => ?BOB,

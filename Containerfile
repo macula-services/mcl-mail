@@ -6,16 +6,17 @@
 # and deploy/docker-compose.yml mounts a host directory there. Without that
 # mount every recreate destroys every mailbox.
 
-# ⚠ THE ROCKSDB PAIR, PINNED BY DIGEST. The letter read model runs on
+# ⚠ THE ROCKSDB PAIR, PINNED BY DATED TAG AND DIGEST. The letter read model runs on
 # barrel_docdb, whose rocksdb binding this repo links against the system
 # librocksdb (the override in rebar.config) rather than compiling the copy it
 # bundles. macula-ci-otp-rocksdb carries librocksdb 11.1.2, OTP 28.4.3 on an
 # OpenSSL with ML-DSA, rebar3, Rust and cmake; a release built in it needs
 # librocksdb.so.11 at run time, which macula-pq-runtime-rocksdb carries. Both
 # are Debian trixie, so the release's ERTS and NIFs match the runtime's glibc.
-# Their tags move daily; the digests are what build. lint.yml pins the same
-# build image, and mcl_mail_service_tests guards all three pins.
-FROM ghcr.io/macula-io/macula-ci-otp-rocksdb@sha256:da4ea316b91f4f29efc8036fa9d95a3b1f3efde8b85cb5997780f140e0f2f6d8 AS builder
+# The pair is published together under one dated tag; the tag says which
+# publication, the digest is what builds, so neither can drift. lint.yml pins
+# the same build image, and mcl_mail_service_tests guards all three pins.
+FROM ghcr.io/macula-io/macula-ci-otp-rocksdb:20260928-1642@sha256:57e3929c45976fbc1d216bddfde831cad7b7e276d8197b099dfbac0cd731a8c9 AS builder
 
 # ⚠ THE OTP RELEASE, ASSERTED HERE because the image tag names a date, not a
 # release. The same check as lint.yml's toolchain step; the service tests read
@@ -40,7 +41,7 @@ COPY config ./config
 COPY apps ./apps
 RUN rebar3 as prod release
 
-FROM ghcr.io/macula-io/macula-pq-runtime-rocksdb@sha256:ecb492cff20a84e88b197cf7d2c660ec1a51b26b3742def95f084499c1124c9f
+FROM ghcr.io/macula-io/macula-pq-runtime-rocksdb:20260928-1642@sha256:e382299fc2ae563371cd4bc61b1f2acc9e27e715fbf7a87db54e2e88285cf54e
 # LINKS THE PACKAGE TO THE REPOSITORY. On registries that read it, ghcr among
 # them, a package without this label is an orphan: it does not appear on the
 # repository page and does not inherit its visibility. A service that shipped

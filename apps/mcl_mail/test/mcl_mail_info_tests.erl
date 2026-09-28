@@ -5,8 +5,9 @@
 %% added the way mcl_om:boot/2 adds it, and the org in config/sys.config.src,
 %% then sent through macula's own frame codec, the path a reply takes. What
 %% arrives must be text, never bytes, and name this service, its procedures and
-%% an mcl_om of at least 0.28 with a macula of at least 12.2 (12.2 under an
-%% older mcl_om lets a failed publish announcement kill the publishing process).
+%% an mcl_om of at least 0.33 with a macula of at least 13.0.1 (mcl_om 0.33 is
+%% the release built on macula 13, whose calls and streams cross stations
+%% sealed; 13.0.1 refuses confidential off by direct dial rather than sealing it).
 -module(mcl_mail_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -26,16 +27,16 @@ info_round_trip_test_() ->
           ?_assertEqual([{text, C} || C <- [<<(?ORG)/binary, "/info">> | Own]],
                         maps:get(capabilities, Reply)),
           ?_assertEqual([], [V || V <- lists:flatten(maps:values(Reply)), is_binary(V)]),
-          ?_assert(at_least(maps:get(mcl_om_version, Reply), [0, 28])),
-          ?_assert(at_least(maps:get(macula_version, Reply), [12, 2]))]
+          ?_assert(at_least(maps:get(mcl_om_version, Reply), [0, 33, 0])),
+          ?_assert(at_least(maps:get(macula_version, Reply), [13, 0, 1]))]
      end}.
 
-%% A floor, not an exact release: the constraints (~> 0.28, ~> 12.2) take any
-%% later minor, and the rule is only that macula 12.2 or later never runs with
-%% an mcl_om older than 0.28. Same major, minor at least the floor's.
-at_least({text, Vsn}, [Major, Minor]) ->
-    [Ma, Mi | _] = [binary_to_integer(P) || P <- binary:split(Vsn, <<".">>, [global])],
-    Ma =:= Major andalso Mi >= Minor.
+%% A floor, not an exact release: the constraints (~> 0.33, ~> 13.0.1) take any
+%% later release they allow. Same major, and major.minor.patch at least the
+%% floor's.
+at_least({text, Vsn}, [Major | _] = Floor) ->
+    [Ma | _] = Parts = [binary_to_integer(P) || P <- binary:split(Vsn, <<".">>, [global])],
+    Ma =:= Major andalso lists:sublist(Parts, 3) >= Floor.
 
 %% The service must leave `info' to mcl_om: declaring its own refuses boot.
 the_service_does_not_declare_info_test_() ->
