@@ -277,18 +277,24 @@ the_claim_names_the_service_and_its_box_test() ->
 
 %% Mail is nothing without the mesh, so it boots only with one: mcl_om 0.33.1's
 %% `{mesh, required}' stops the boot naming each of MCL_REALM, MCL_REALM_KEY,
-%% MACULA_STATION_SEEDS and MACULA_STATION_NODE_IDS that is missing, where
-%% `optional' boots a green node that answers /health and nothing else.
+%% MACULA_STATION_SEEDS and MACULA_STATION_NODE_IDS that is missing. Under
+%% `optional' an unset seed list boots a green node that answers /health and
+%% nothing else, and the other three stop without naming the setting. The
+%% setting must sit in the mcl_om block, which is the one mcl_om reads.
 the_service_requires_the_mesh_test() ->
     ?assertEqual(<<"required">>,
-                 pinned("config/sys.config.src", "^\\s+\\{mesh,\\s+(required)\\},?$")).
+                 pinned("config/sys.config.src",
+                        "(?s)^\\s+\\{mcl_om, \\[(?:(?!^\\s+\\]\\},?$).)*?^\\s+\\{mesh,\\s+(required)\\},?$")).
 
 %% Only main publishes :latest and only a v* tag publishes a version: a build of
 %% any other ref, by hand, would otherwise overwrite :latest.
+%% The whole block: main publishes :latest, and any other ref ends in exit 1.
 only_main_publishes_latest_test() ->
-    ?assertMatch(<<_/binary>>,
+    ?assertEqual(<<"exit 1">>,
                  pinned(".github/workflows/build-push.yml",
-                        "^\\s+elif \\[\\[ \"\\$\\{GITHUB_REF\\}\" == (refs/heads/main) \\]\\]; then$")).
+                        "^\\s+elif \\[\\[ \"\\$\\{GITHUB_REF\\}\" == refs/heads/main \\]\\]; then\\n"
+                        "\\s+echo \"tags=[^\\n]*:latest\" >> \"\\$GITHUB_OUTPUT\"\\n"
+                        "\\s+else\\n(?:\\s+#[^\\n]*\\n)*\\s+echo [^\\n]*>&2\\n\\s+(exit 1)\\n\\s+fi$")).
 
 %% The example runs an image by DIGEST, in the shape the fleet's compose files
 %% in macula-fleet use: the repository fixed here, the digest from MCL_MAIL_IMAGE_DIGEST, no tag to drift and no watchtower

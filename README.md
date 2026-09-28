@@ -127,8 +127,10 @@ Two things CI cannot do for you, both of which have bitten:
    the host with a bare `unauthorized` that names nothing. Check it after the
    first build. On ghcr the `org.opencontainers.image.source` label in the
    Containerfile is what links the package to the repository.
-2. The host needs `MCL_REALM`, `MCL_REALM_KEY`, the pinned station pair and
-   `MCL_MAIL_IMAGE_DIGEST` supplied from somewhere they are not committed.
+2. The host needs `MCL_REALM` from its secrets env file, and `MCL_REALM_KEY`,
+   the pinned station pair and `MCL_MAIL_IMAGE_DIGEST` from the box's committed
+   config env in macula-fleet (`mcl-mail-config.env`, which the fleet does not
+   have yet).
 
 ## The service contract
 
