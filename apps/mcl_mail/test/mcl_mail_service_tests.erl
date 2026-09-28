@@ -281,7 +281,7 @@ the_claim_names_the_service_and_its_box_test() ->
 %% `optional' boots a green node that answers /health and nothing else.
 the_service_requires_the_mesh_test() ->
     ?assertEqual(<<"required">>,
-                 pinned("config/sys.config.src", "^\\s+\\{mesh,\\s+(required)\\},")).
+                 pinned("config/sys.config.src", "^\\s+\\{mesh,\\s+(required)\\},?$")).
 
 %% Only main publishes :latest and only a v* tag publishes a version: a build of
 %% any other ref, by hand, would otherwise overwrite :latest.
