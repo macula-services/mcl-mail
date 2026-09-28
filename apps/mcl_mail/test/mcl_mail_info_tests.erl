@@ -28,7 +28,7 @@ info_round_trip_test_() ->
           ?_assertEqual([{text, C} || C <- [<<(?ORG)/binary, "/info">> | Own]],
                         maps:get(capabilities, Reply)),
           ?_assertEqual([], [V || V <- lists:flatten(maps:values(Reply)), is_binary(V)]),
-          ?_assert(at_least(maps:get(mcl_om_version, Reply), [0, 33, 0])),
+          ?_assert(at_least(maps:get(mcl_om_version, Reply), [0, 33, 1])),
           ?_assert(at_least(maps:get(macula_version, Reply), [13, 0, 1]))]
      end}.
 
