@@ -25,7 +25,7 @@ jobs:
       # 28.4.3. mcl_mail_service_tests guards this pin and that check.
       image: ghcr.io/macula-io/macula-ci-otp-rocksdb:20260928-1642@sha256:57e3929c45976fbc1d216bddfde831cad7b7e276d8197b099dfbac0cd731a8c9
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Verify the toolchain is the one we think it is
         run: |
           openssl version
