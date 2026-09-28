@@ -1,6 +1,6 @@
 {application, guide_mailbox_lifecycle, [
     {description, "CMD service: open/close a citizen's mailbox, deposit/read/reply/archive letters (mailbox-{citizen_did} stream)"},
-    {vsn, "0.1.0"},
+    {vsn, "0.1.1"},
     {registered, []},
     {mod, {guide_mailbox_lifecycle_app, []}},
     {applications, [

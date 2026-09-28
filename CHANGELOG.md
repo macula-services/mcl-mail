@@ -7,6 +7,19 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-28
+
+### Fixed
+
+- **The image is signed.** 0.1.0 shipped unsigned: `build-push.yml` had no
+  attest job, so a box whose reconciler enforces signatures refuses it. The
+  pushed digest now goes to macula-ci-images' `attest-image.yml`, pinned by
+  full commit, which signs it keylessly and attests its SBOM and provenance,
+  as mcl-echo's build does. A documentation-only push, which builds nothing,
+  attests nothing.
+- Every action the workflows run is pinned by full commit, the ones
+  mcl-echo uses; they were pinned by moving tags. A test holds both.
+
 ## [0.1.0] - 2026-09-28
 
 ### Changed
