@@ -6,8 +6,9 @@
 %% then sent through macula's own frame codec, the path a reply takes. What
 %% arrives must be text, never bytes, and name this service, its procedures and
 %% an mcl_om of at least 0.33 with a macula of at least 13.0.1 (mcl_om 0.33 is
-%% the release built on macula 13, whose calls and streams cross stations
-%% sealed; 13.0.1 refuses confidential off by direct dial rather than sealing it).
+%% the release on macula 13; 13.0.1 is where seed() carries the expected_node_id
+%% every pinned-seed consumer passes). Sealing needs kem_advertise, which this
+%% service leaves off: its calls stay in the clear.
 -module(mcl_mail_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").

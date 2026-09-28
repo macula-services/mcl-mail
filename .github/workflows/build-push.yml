@@ -11,8 +11,8 @@
 # nothing on the fleet follows it. A tag that also moved :latest would make that
 # label jump to a release, so the two stay apart.
 #
-# NO PATH FILTER, ON PURPOSE. A docs-only push should not rebuild :latest and
-# restart every box, but `paths-ignore' cannot be trusted with that: on the push
+# NO PATH FILTER, ON PURPOSE. A docs-only push should not rebuild :latest,
+# but `paths-ignore' cannot be trusted with that: on the push
 # that CREATES a branch GitHub evaluates it on the head commit alone, so a first
 # push ending in a README edit silently built no image. scripts/is_image_push.sh
 # decides from the pushed range instead, and builds whenever it cannot tell.

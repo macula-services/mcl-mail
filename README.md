@@ -97,12 +97,13 @@ image build brings its own:
 | `MCL_DATA_DIR` | `/data` in the image | Where the store (`mcl_mail_store/`), the read model (`mcl_mail/`) and barrel_docdb's system database (`barrel_docdb/`) live. The compose file mounts a host directory there. |
 | `MCL_SERVICE_NAME` | `mcl-mail` | Label on the boot claim the realm's operator sees on the Providers desk. |
 | `MCL_BOX` | empty | Label naming the host, also on the boot claim. Set it where you deploy. |
+| `MCL_DATA` | `/bulk0/mcl-mail` in the compose file | The host directory mounted on `/data`. On a fleet node, a bulk drive, never the small root partition. |
 | `MCL_MAIL_IMAGE_DIGEST` | required by the compose file | `sha256:<digest>` of the released image to run. The compose file runs the image by digest, never by tag. |
 
 `deploy/docker-compose.yml` runs it, a minimal runnable example that carries
-what the service knows about itself. The fleet runs its own compose for this
-service (macula-fleet `edge/scripts/docker-compose.mcl-mail.yml`), in the same
-shape. If you deploy through something else, let that carry **placement**: which
+what the service knows about itself. The fleet deploys services from its own
+compose files in macula-fleet, in the same shape: the image by digest, the
+digest from the box's committed config env. If you deploy through something else, let that carry **placement**: which
 host, which station, which realm, which secret store. Keeping the two apart is
 what stops a config table in a README and the real environment drifting.
 
@@ -126,8 +127,8 @@ Two things CI cannot do for you, both of which have bitten:
    the host with a bare `unauthorized` that names nothing. Check it after the
    first build. On ghcr the `org.opencontainers.image.source` label in the
    Containerfile is what links the package to the repository.
-2. The host needs `MCL_REALM` and the pinned station pair supplied from
-   somewhere they are not committed.
+2. The host needs `MCL_REALM`, `MCL_REALM_KEY`, the pinned station pair and
+   `MCL_MAIL_IMAGE_DIGEST` supplied from somewhere they are not committed.
 
 ## The service contract
 
@@ -148,7 +149,8 @@ the PRJ department: `project_mailboxes` opens it when it starts, before its
 projection runs, because mcl_om replays the store into the projection at boot.
 barrel_docdb's own system database, which records where each database lives,
 is pinned to the data volume in `config/sys.config.src`; its default is
-`data/barrel_docdb` in the working directory, `/app/data` inside the container.
+`data/barrel_docdb` relative to the working directory, `/app/data/barrel_docdb`
+inside the container.
 
 ⚠ **The store id is written in two places**, `store_id/0` and the `evoq` block,
 and nothing makes them agree by itself. A test compares them, along with a

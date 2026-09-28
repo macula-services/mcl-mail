@@ -227,8 +227,8 @@ the_read_model_has_a_name_barrel_docdb_accepts_test() ->
 %%==============================================================================
 
 %% barrel_docdb keeps its system database (`_barrel_system') under its own
-%% `data_dir' app env, which defaults to data/barrel_docdb in the working
-%% directory (/app/data): inside the container,
+%% `data_dir' app env, which defaults to data/barrel_docdb relative to the
+%% working directory (/app/data/barrel_docdb): inside the container,
 %% gone on every recreate, and with it the record of where the read model lives.
 %% It goes on the data volume, beside the store and the read model.
 barrel_system_db_is_on_the_data_volume_test() ->
@@ -275,9 +275,8 @@ the_claim_names_the_service_and_its_box_test() ->
     ?assertMatch({match, _}, re:run(Text, <<"- MCL_SERVICE_NAME=mcl-mail\\n">>)),
     ?assertMatch({match, _}, re:run(Text, <<"- MCL_BOX=\\$\\{MCL_BOX:-\\}\\n">>)).
 
-%% The example runs an image by DIGEST, as the fleet's own compose does
-%% (macula-fleet edge/scripts/docker-compose.mcl-mail.yml): the repository fixed
-%% here, the digest from MCL_MAIL_IMAGE_DIGEST, no tag to drift and no watchtower
+%% The example runs an image by DIGEST, in the shape the fleet's compose files
+%% in macula-fleet use: the repository fixed here, the digest from MCL_MAIL_IMAGE_DIGEST, no tag to drift and no watchtower
 %% to recreate the container behind the fleet's back.
 the_example_runs_an_image_by_digest_test() ->
     {ok, Text} = file:read_file(alongside("deploy/docker-compose.yml")),
