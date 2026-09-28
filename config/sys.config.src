@@ -57,7 +57,12 @@
         %% That is WRONG for this path and cost a deployment: `macula_direct_dial'
         %% never supplies the foundation form, so the pinned key is the only
         %% way an advertisement is ever trusted.
-        {realm_key,         <<"${MCL_REALM_KEY}">>}
+        {realm_key,         <<"${MCL_REALM_KEY}">>},
+        %% ⚠ MAIL IS NOTHING WITHOUT THE MESH. With `required' (mcl_om 0.33.1)
+        %% a boot missing MCL_REALM, MCL_REALM_KEY, MACULA_STATION_SEEDS or
+        %% MACULA_STATION_NODE_IDS stops and names each one, where `optional'
+        %% boots a green node that answers /health and nothing else.
+        {mesh,              required}
     ]},
     %% ==========================================================================
     %% THE PQ CRYPTO PROFILE, WITHOUT WHICH THIS NODE DOES NOT PEER
