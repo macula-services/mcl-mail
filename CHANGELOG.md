@@ -9,7 +9,13 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- **On `mcl_om` 0.33 with macula 13.0.1** (evoq 1.26, barrel_docdb 1.7). The
+- **The service requires the mesh** (`{mesh, required}`, mcl_om 0.33.1): a boot
+  missing `MCL_REALM`, `MCL_REALM_KEY`, `MACULA_STATION_SEEDS` or
+  `MACULA_STATION_NODE_IDS` stops and names each one, where it booted a green
+  node that answered `/health` and nothing else.
+- Only `main` publishes `:latest` and only a `v*` tag publishes a version; a
+  build of any other ref is refused, naming it.
+- **On `mcl_om` 0.33.1 with macula 13.0.1** (evoq 1.26, barrel_docdb 1.7). The
   floors are mcl_om 0.33's own: with the looser `~> 12.2` before, rebar3 could
   pick mcl_om 0.33 with a macula 12 it does not support, and the info test now
   checks the pair down to the patch release.

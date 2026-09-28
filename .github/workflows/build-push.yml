@@ -72,8 +72,12 @@ jobs:
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             echo "tags=ghcr.io/macula-services/mcl-mail:${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
-          else
+          elif [[ "${GITHUB_REF}" == refs/heads/main ]]; then
             echo "tags=ghcr.io/macula-services/mcl-mail:latest" >> "$GITHUB_OUTPUT"
+          else
+            # A build of any other ref (by hand) would overwrite :latest.
+            echo "build-push: only main publishes :latest and only a v* tag a version, not ${GITHUB_REF}" >&2
+            exit 1
           fi
 
       - name: Build and push
