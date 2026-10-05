@@ -141,20 +141,22 @@ nobody is watching, and the eunit suite guards the attribute itself.
 
 ### The store and the read model
 
-The service owns a `reckon-db` store, `mcl_mail_store`: it exports `store_id/0`
-and `data_dir/0`, so `mcl_om:boot/1` opens the store and its evoq subscription
-before `start/1` fires, and `config/sys.config.src` carries the `evoq` adapter
-block that boot requires.
+The service owns a `reckon-db` store, `mcl_mail_store`. mcl_om opens no store
+(0.35 on, mcl-om#10), so the service declares `reckon_db`, `evoq` and
+`reckon_evoq` itself, `mcl_mail_service:event_store/0` describes the store, and
+`mcl_mail_app` opens it and its evoq subscription (`mcl_mail_store`) before
+`mcl_om:boot/1`. `config/sys.config.src` carries the `evoq` adapter block that
+the subscription requires.
 
 The letter read model is barrel_docdb's database `mcl_mail`, and it belongs to
 the PRJ department: `project_mailboxes` opens it when it starts, before its
-projection runs, because mcl_om replays the store into the projection at boot.
+projection runs, because the store's subscription replays into the projection at boot.
 barrel_docdb's own system database, which records where each database lives,
 is pinned to the data volume in `config/sys.config.src`; its default is
 `data/barrel_docdb` relative to the working directory, `/app/data/barrel_docdb`
 inside the container.
 
-⚠ **The store id is written in two places**, `store_id/0` and the `evoq` block,
+⚠ **The store id is written in two places**, `event_store/0`'s `id` and the `evoq` block,
 and nothing makes them agree by itself. A test compares them, along with a
 second one asserting the `evoq` block is present at all. Keep both.
 

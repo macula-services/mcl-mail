@@ -7,7 +7,10 @@
 %% opens, reads, replies from and archives in their OWN mailbox, and the
 %% sender of a deposited letter is whoever signed the deposit.
 %%
-%% SIX CALLBACKS, ALL REQUIRED. mcl_om resolves them BY NAME at startup, on a
+%% SIX CALLBACKS, ALL REQUIRED. The store is this service's own: event_store/0
+%% describes it and mcl_mail_app opens it before mcl_om:boot/1 (mcl_om opens
+%% none from 0.35, mcl-om#10; NOT store_id/0 and data_dir/0, a pair it would
+%% warn about). mcl_om resolves them BY NAME at startup, on a
 %% live node, so a service that forgets one dies with `undef' where nobody is
 %% watching. The `-behaviour' attribute below is what turns that into a compile
 %% error instead, and the test suite guards the attribute itself.
@@ -16,28 +19,13 @@
 -behaviour(mcl_om_service).
 
 -export([info/0, start/1, stop/1, health/0, capabilities/0, identity_spec/0]).
-%% ==========================================================================
-%% AND TWO OPTIONAL ONES, WHICH TURN THE STORE ON
-%% ==========================================================================
-%%
-%% Generated because this service was scaffolded with `store=1'. Exporting
-%% `store_id/0' and `data_dir/0' TOGETHER makes `mcl_om:boot/1' open a
-%% reckon-db store before this module's `start/1' fires.
-%%
-%% ⚠ THE reckon-db APPLICATIONS RUN EITHER WAY. `reckon_db', `reckon_evoq',
-%% `reckon_gater', `evoq', `khepri' and `ra' start with `mcl_om' whether these
-%% callbacks exist or not. What the two add is a STORE: a data directory, an open
-%% handle, and something written. A sibling service claimed for months that they
-%% suppressed the whole stack while six of its thirty-one running applications
-%% quietly disproved it.
-%%
-%% ⚠⚠ AND `config/sys.config.src' MUST CARRY THE `evoq' BLOCK, which is why it was
-%% generated with one. mcl_om starts a per-store evoq subscription that reads
-%% the global log, and that crashes on `{not_configured, event_store_adapter}'
-%% without it. evoq starts as a release-boot application before any service's
-%% `start/2' runs, so nothing can inject it later. A sibling put two of three
-%% fleet nodes into a boot-crash loop this exact way.
--export([store_id/0, data_dir/0]).
+%% ⚠ `config/sys.config.src' MUST CARRY THE `evoq' BLOCK. mcl_mail_store starts
+%% a per-store evoq subscription that reads the global log, and that crashes on
+%% `{not_configured, event_store_adapter}' without it. evoq starts as a
+%% release-boot application before any service's `start/2' runs, so nothing can
+%% inject it later. A sibling put two of three fleet nodes into a boot-crash
+%% loop this exact way.
+-export([event_store/0]).
 info() ->
     #{name => <<"mcl-mail">>,
       version => <<"0.2.0">>,
@@ -93,23 +81,27 @@ identity_spec() ->
 %% The store
 %% ==========================================================================
 
-%% @doc The reckon-db store this service owns.
+%% @doc The reckon-db store this service owns, as mcl_mail_app opens it.
 %%
-%% ⚠ IT IS NAMED IN TWO PLACES, here and in the `evoq' block of
+%% `id': ⚠ NAMED IN TWO PLACES, here and in the `evoq' block of
 %% `config/sys.config.src', and nothing makes them agree by itself. Disagreeing
-%% opens one store and addresses another. A generated test compares the two.
--spec store_id() -> atom().
-store_id() -> mcl_mail_store.
-
-%% @doc Where it lives on disk.
+%% opens one store and addresses another. A test compares the two. Every CMD
+%% desk names the same store when it dispatches.
 %%
+%% `dir': where it lives on disk, the store at <dir>/mcl_mail_store.
 %% ⚠ DEFAULTS TO A PATH INSIDE THE CONTAINER AND MUST NOT STAY THERE ON A NODE.
 %% The fleet keeps application data on its `/bulk' drives and boots from a small
 %% eMMC, so `deploy/docker-compose.yml' mounts a volume and sets this. The default
 %% is what a laptop wants; a container without the mount loses its record on every
 %% recreate, which is the same as not keeping one.
--spec data_dir() -> string().
-data_dir() -> chosen(os:getenv("MCL_DATA_DIR")).
+-spec event_store() -> #{id := atom(), dir := string(), indexes := [term()],
+                         mode := single | cluster, integrity := disabled | map()}.
+event_store() ->
+    #{id => mcl_mail_store,
+      dir => chosen(os:getenv("MCL_DATA_DIR")),
+      indexes => [],
+      mode => single,
+      integrity => disabled}.
 
 chosen(false) -> "/tmp/mcl_mail";
 chosen("") -> "/tmp/mcl_mail";

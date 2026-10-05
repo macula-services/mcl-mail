@@ -9,8 +9,12 @@
         crypto,
         %% Mesh SDK, realm identity, capabilities, health.
         mcl_om,
-        %% The departments, started before this app so mcl_om:boot/1 finds
-        %% them up when it opens the store, and capabilities/0's responders
+        %% This service's own event store (mcl_mail_store opens it).
+        reckon_db,
+        evoq,
+        reckon_evoq,
+        %% The departments, started before this app so they are up when
+        %% mcl_mail_app opens the store, and capabilities/0's responders
         %% are loaded.
         guide_mailbox_lifecycle,
         project_mailboxes,

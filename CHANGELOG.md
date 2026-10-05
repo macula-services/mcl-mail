@@ -12,6 +12,16 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **On mcl_om 0.37.6 and macula 13.5.0** (`mcl_om ~> 0.37`, `macula ~> 13.5`, released versions only). mcl_om 0.37 brings
   the inbound guard pipeline (mcl-om#14); macula 13.5 adds `macula_record:decode_payload/1`, no wire
   change. This release is what the dev fleet's `:latest` follows: CI signs it, then moves `:latest`.
+
+### Changed
+
+- **The store is this service's own** (mcl-om#10). From mcl_om 0.35 on, mcl_om opens no store and
+  brings no reckon-db or evoq application, so on mcl_om 0.37 nothing would start `reckon_db` or
+  open a store. mcl-mail now declares `reckon_db`, `evoq` and `reckon_evoq` itself
+  (`~> 5.11`, `~> 1.26`, `~> 2.7`), and `mcl_mail_app` opens the store with its own copy of the
+  wiring (`mcl_mail_store`) before `mcl_om:boot/1`, after the three departments have started. The
+  service describes the store as one `event_store/0` map instead of `store_id/0` and `data_dir/0`.
+
 ## [0.1.1] - 2026-09-28
 
 ### Fixed
