@@ -40,7 +40,7 @@
 -export([store_id/0, data_dir/0]).
 info() ->
     #{name => <<"mcl-mail">>,
-      version => <<"0.1.1">>,
+      version => <<"0.2.0">>,
       description => <<"Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now">>}.
 
 start(_Opts) -> mcl_mail_sup:start_link().
