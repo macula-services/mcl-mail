@@ -109,12 +109,13 @@ what stops a config table in a README and the real environment drifting.
 
 ## Deployment
 
-A `v*` tag publishes `ghcr.io/macula-services/mcl-mail:<version>` and nothing
-else: a release. The fleet runs a release **by digest**: macula-fleet pins the
-digest the tag produced and reconciles the box to it, so a new image reaches a
-box only when its pin is bumped, and rolling back is pinning an earlier digest. A
-push to `main` publishes `:latest`, the tip of main to try; nothing on the fleet
-follows it. A push that changes only documentation builds no image
+A `v*` tag publishes `ghcr.io/macula-services/mcl-mail:<version>` and nothing else, signed
+by digest with its SBOM and provenance (macula-ci-images' `attest-image.yml`). A push to
+`main` publishes `:main` and `:<sha>`, which nothing follows, and nothing moves `:latest`.
+The fleet runs a release by digest: macula-fleet's pin-releases workflow finds the signed
+release, verifies it was signed on its tag and pins `<version>@sha256:<digest>`
+(macula-fleet#14, #15), so a green `v*` tag is the deploy. To roll back, revert the pin and
+hold the image there. A push that changes only documentation builds no image
 (`scripts/is_image_push.sh`).
 
 The service's org, the `<org>` in every procedure it offers (`<org>/<name>`), is
