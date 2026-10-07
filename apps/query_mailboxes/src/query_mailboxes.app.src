@@ -1,6 +1,6 @@
 {application, query_mailboxes, [
     {description, "QRY: get_mailbox/get_letter read desks for mcl-mail"},
-    {vsn, "0.2.0"},
+    {vsn, "0.3.0"},
     {registered, [query_mailboxes_sup]},
     {mod, {query_mailboxes_app, []}},
     {applications, [kernel, stdlib, mcl_om, guide_mailbox_lifecycle, project_mailboxes]},
