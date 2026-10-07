@@ -64,15 +64,15 @@ ENV RELX_REPLACE_OS_VARS=true
 ENV MCL_NODE_NAME=mcl_mail
 ENV MCL_NODE_HOST=127.0.0.1
 ENV MCL_COOKIE=mcl_mail
-ENV MCL_HEALTH_PORT=8496
 # The store, the read model and barrel_docdb's system database all live here;
 # deploy/docker-compose.yml mounts the host directory on it.
 ENV MCL_DATA_DIR=/data
 
 VOLUME ["/etc/mcl/secrets"]
 
-EXPOSE 8496
+# /health is a Unix socket (health_socket in sys.config.src): no port is opened
+# just to be health-checked.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -fsS "http://127.0.0.1:${MCL_HEALTH_PORT}/health" || exit 1
+    CMD curl -fsS --unix-socket /run/mcl/health.sock http://localhost/health || exit 1
 
 CMD ["/app/bin/mcl_mail", "foreground"]

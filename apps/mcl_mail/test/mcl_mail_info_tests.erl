@@ -5,8 +5,8 @@
 %% added the way mcl_om:boot/2 adds it, and the org in config/sys.config.src,
 %% then sent through macula's own frame codec, the path a reply takes. What
 %% arrives must be text, never bytes, and name this service, its procedures and
-%% an mcl_om of at least 0.38.0 with a macula of at least 14.2.1 (mcl_om 0.38 is
-%% the release on macula 14; 14.2.1 is the current SDK base, mcl-mail#5). Sealing needs kem_advertise, which this
+%% an mcl_om of at least 0.39.0 with a macula of at least 14.2.1 (mcl_om 0.39 is
+%% on macula 14 and serves /health on a Unix socket; 14.2.1 is the current SDK base, mcl-mail#5). Sealing needs kem_advertise, which this
 %% service leaves off: its calls stay in the clear.
 -module(mcl_mail_info_tests).
 
@@ -27,11 +27,11 @@ info_round_trip_test_() ->
           ?_assertEqual([{text, C} || C <- [<<(?ORG)/binary, "/info">> | Own]],
                         maps:get(capabilities, Reply)),
           ?_assertEqual([], [V || V <- lists:flatten(maps:values(Reply)), is_binary(V)]),
-          ?_assert(at_least(maps:get(mcl_om_version, Reply), [0, 38, 0])),
+          ?_assert(at_least(maps:get(mcl_om_version, Reply), [0, 39, 0])),
           ?_assert(at_least(maps:get(macula_version, Reply), [14, 2, 1]))]
      end}.
 
-%% A floor, not an exact release: the constraints (~> 0.38, ~> 14.2) take any
+%% A floor, not an exact release: the constraints (~> 0.39, ~> 14.2) take any
 %% later release they allow. Same major, and major.minor.patch at least the
 %% floor's.
 at_least({text, Vsn}, [Major | _] = Floor) ->
