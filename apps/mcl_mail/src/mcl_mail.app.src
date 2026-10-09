@@ -1,6 +1,6 @@
 {application, mcl_mail, [
     {description, "Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now"},
-    {vsn, "0.3.0"},
+    {vsn, "0.3.1"},
     {registered, [mcl_mail_sup]},
     {mod, {mcl_mail_app, []}},
     {applications, [
