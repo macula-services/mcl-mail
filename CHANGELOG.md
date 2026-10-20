@@ -5,6 +5,16 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Every app the release names carries the release version (mcl-mail#7). The desk
+  apps sat at 0.3.4 through v0.4.0 while the release tuple said the tag's
+  version, so the release guard would refuse the next tag and every box would
+  have gone on reporting the older one. `mcl_mail_release_apps_tests` now reads the release tuple,
+  every app it names and each app's .app.src, and fails when they disagree.
+
 ## 0.4.0 - 2026-10-17
 
 - **Wire 1.0: on macula 15.6 and mcl_om 1.0** (macula-fleet#27). macula 15 neither reads a 14 node's frames nor completes a handshake with it, so the fleet moves across in one flag day rather than node by node. mcl_om 1.0 is this service on the new wire: no function it calls moved or changed arity. `mcl_om ~> 0.x` takes any 0.x, so a 0.43 on macula 15 would have rolled the live 0.10.3 fleet on its next build; it names 1.0, which is outside that range.
