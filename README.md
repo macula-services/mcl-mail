@@ -54,7 +54,7 @@ A letter goes out as `letter_id`, `from_did` (64 hex), `subject`, `body`,
 
 ### Who a call acts as
 
-**Every procedure acts as the CALL's caller.** macula puts `caller` on each
+**A procedure acts as the CALL's caller.** macula puts `caller` on each
 inbound CALL: the node id of the identity key that signed the request, verified
 by every station on the path and again by this provider, and written over any
 `caller` the payload sends. A citizen's DID is that same node id. So a citizen
@@ -81,13 +81,15 @@ An umbrella of four apps, one per department:
 - `query_mailboxes` (QRY): `get_mailbox` and `get_letter`, read from that model.
 - `mcl_mail`: the `mcl_om_service` contract.
 
-close, archive and unarchive a mailbox are tested desks with no procedure yet:
-no client needs them. Marking a letter read is folded into the two reads.
+close, archive and unarchive a mailbox are tested desks whose commands no responder
+serves yet, because no client needs them. Marking a letter read is folded into the two reads.
 
-Like every mcl service, it also answers `mcl-mail/info`, which mcl_om adds: its
-name, version and description, its org and claim labels, node id, the macula
-and mcl_om versions, uptime, the health word and the procedures it advertises.
-Open to any mesh caller, public facts only.
+`mcl-mail/info` is not this service's own: `mcl_om` adds `mcl-mail/info` and
+`mcl-mail/get_limits` to every service, both open, and `capabilities/0` is the
+list of the service's own procedures. `info` carries its name, version and
+description, its org and claim labels, node id, the macula and mcl_om versions,
+uptime, the health word and the procedures it advertises; `get_limits` carries
+the guard's limits and window. Both are open to any mesh caller, public facts only.
 
 ## Running it
 
@@ -139,7 +141,7 @@ release, verifies it was signed on its tag and pins `<version>@sha256:<digest>`
 hold the image there. A push that changes only documentation builds no image
 (`scripts/is_image_push.sh`).
 
-The service's org, the `<org>` in every procedure it offers (`<org>/<name>`), is
+The service's org, the `<org>` its own procedure names carry (`<org>/<name>`), is
 this repository's name, fixed in `config/sys.config.src`. The realm's grant names
 it; without an org mcl_om advertises nothing.
 

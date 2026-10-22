@@ -141,7 +141,7 @@
 <text class="t-rel" x="524" y="922" text-anchor="middle">dials</text>
 <rect class="b-ext" x="64" y="1040" width="920" height="136" rx="10"/>
 <text class="t-code" x="80" y="1068">Host environment</text>
-<text class="t-type" x="80" y="1086">[read at boot; nothing here is baked into the image]</text>
+<text class="t-type" x="80" y="1086">[read at boot; MCL_NODE_NAME, MCL_COOKIE and MCL_DATA_DIR have image defaults]</text>
 <text class="t-desc" x="80" y="1110">MCL_REALM and MCL_REALM_KEY are required: the realm tag and its public key, the trust anchor. MACULA_STATION_SEEDS with</text>
 <text class="t-desc" x="80" y="1126">MACULA_STATION_NODE_IDS is the pinned dial: each seed pairs with its station's node id. MCL_DATA_DIR holds the store, the read model</text>
 <text class="t-desc" x="80" y="1142">and barrel_docdb's system database. MCL_COOKIE and MCL_NODE_NAME name the node; MCL_SERVICE_NAME and MCL_BOX label the boot claim.</text>

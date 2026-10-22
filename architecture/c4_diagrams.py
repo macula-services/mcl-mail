@@ -156,7 +156,7 @@ def context():
     d.edge("M620 338V370H825V430"); d.text("t-rel", 632, 364, "pinned seeds, dial")
     d.text("t-desc", 40, 596, "It calls nothing outside the mesh: no HTTP client, no SMTP, no database server. The store and the letter")
     d.text("t-desc", 40, 614, "read model are local files under MCL_DATA_DIR. A DID is a Macula node id, and macula puts the signing")
-    d.text("t-desc", 40, 632, "caller on every CALL, so every procedure acts as that citizen and nothing in a payload can name another.")
+    d.text("t-desc", 40, 632, "caller on every CALL, so the call acts as that citizen and nothing in a payload can name another.")
     d.legend(650, boundary=False)
     d.write()
 
@@ -210,7 +210,7 @@ def components():
     d.edge("M864 670V710"); d.text("t-rel", 872, 694, "writes a document")
     d.edge("M512 770H536"); d.text("t-rel", 524, 762, "reads", anchor="middle")
     d.edge("M512 930H536"); d.text("t-rel", 524, 922, "dials", anchor="middle")
-    d.box("b-ext", 64, 1040, 920, 136, "Host environment", "[read at boot; nothing here is baked into the image]",
+    d.box("b-ext", 64, 1040, 920, 136, "Host environment", "[read at boot; MCL_NODE_NAME, MCL_COOKIE and MCL_DATA_DIR have image defaults]",
           ["MCL_REALM and MCL_REALM_KEY are required: the realm tag and its public key, the trust anchor. MACULA_STATION_SEEDS with",
            "MACULA_STATION_NODE_IDS is the pinned dial: each seed pairs with its station's node id. MCL_DATA_DIR holds the store, the read model",
            "and barrel_docdb's system database. MCL_COOKIE and MCL_NODE_NAME name the node; MCL_SERVICE_NAME and MCL_BOX label the boot claim."],

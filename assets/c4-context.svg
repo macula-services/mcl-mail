@@ -98,7 +98,7 @@
 <text class="t-rel" x="632" y="364">pinned seeds, dial</text>
 <text class="t-desc" x="40" y="596">It calls nothing outside the mesh: no HTTP client, no SMTP, no database server. The store and the letter</text>
 <text class="t-desc" x="40" y="614">read model are local files under MCL_DATA_DIR. A DID is a Macula node id, and macula puts the signing</text>
-<text class="t-desc" x="40" y="632">caller on every CALL, so every procedure acts as that citizen and nothing in a payload can name another.</text>
+<text class="t-desc" x="40" y="632">caller on every CALL, so the call acts as that citizen and nothing in a payload can name another.</text>
 <rect class="b-sys" x="24" y="650" width="22" height="14" rx="3"/>
 <text class="t-leg" x="54" y="662">In scope</text>
 <rect class="b-per" x="110.8" y="650" width="22" height="14" rx="3"/>
