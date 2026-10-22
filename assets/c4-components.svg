@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1310" role="img" aria-label="mcl-mail components">
+<title>mcl-mail components</title>
+<style>
+.t-name { font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 700; }
+.t-desc { font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; font-size: 12.5px; }
+.t-rel { font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; font-size: 11.5px; paint-order: stroke; stroke-width: 4px; stroke-linejoin: round; }
+.t-code { font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 13px; font-weight: 600; }
+.t-type { font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; }
+.t-bound { font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 12px; font-weight: 600; }
+.t-leg { font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; font-size: 12px; }
+.edge { fill: none; stroke-width: 1.25; }
+.edge-later { fill: none; stroke-width: 1.25; stroke-dasharray: 5 4; }
+.bg { fill: #FFFFFF; }
+.b-sys { fill: #F5E9CC; stroke: #A56F0A; stroke-width: 2; }
+.b-per { fill: #E3EBF2; stroke: #3B5B7A; stroke-width: 1.25; }
+.b-mac { fill: #E6E4EE; stroke: #5E5A78; stroke-width: 1.25; }
+.b-ext { fill: #ECEFED; stroke: #8A9791; stroke-width: 1.25; }
+.b-cmp { fill: #FFFFFF; stroke: #8A9791; stroke-width: 1.25; }
+.b-later { fill: none; stroke: #8A9791; stroke-width: 1.25; stroke-dasharray: 5 4; }
+.bound { fill: none; stroke: #B3BDB8; stroke-width: 1; }
+.head { fill: #3B5B7A; }
+.t-name, .t-code { fill: #16201D; }
+.t-type, .t-bound, .t-leg { fill: #66736E; }
+.t-desc { fill: #34413C; }
+.t-rel { fill: #66736E; stroke: #FFFFFF; }
+.edge, .edge-later { stroke: #8A9791; }
+.arrowhead { fill: #8A9791; }
+@media (prefers-color-scheme: dark) {
+.bg { fill: #171F1C; }
+.b-sys { fill: #3A2E13; stroke: #E3AA3C; }
+.b-per { fill: #1D2A36; stroke: #8EB4D8; }
+.b-mac { fill: #26243A; stroke: #A9A4C8; }
+.b-ext { fill: #1C2421; stroke: #7D8B85; }
+.b-cmp { fill: #171F1C; stroke: #7D8B85; }
+.b-later { stroke: #7D8B85; }
+.bound { stroke: #4A5752; }
+.head { fill: #8EB4D8; }
+.t-name, .t-code { fill: #E6ECE9; }
+.t-type, .t-bound, .t-leg { fill: #93A09A; }
+.t-desc { fill: #C3CDC8; }
+.t-rel { fill: #93A09A; stroke: #171F1C; }
+.edge, .edge-later { stroke: #7D8B85; }
+.arrowhead { fill: #7D8B85; }
+}
+</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0L10 5L0 10z"/></marker></defs>
+<rect class="bg" x="0" y="0" width="1040" height="1310"/>
+<rect class="bound" x="40" y="40" width="968" height="970" rx="12"/>
+<text class="t-bound" x="56" y="62">mcl-mail [Container]</text>
+<rect class="b-cmp" x="56" y="70" width="456" height="120" rx="10"/>
+<text class="t-code" x="72" y="98">mcl_mail_app</text>
+<text class="t-type" x="72" y="116">[OTP application]</text>
+<text class="t-desc" x="72" y="140">start/2 opens mcl_mail_store, then calls</text>
+<text class="t-desc" x="72" y="156">mcl_om:boot(mcl_mail_service) to wire the mesh.</text>
+<text class="t-desc" x="72" y="172">mcl_om opens no store from 0.35 (mcl-om#10).</text>
+<rect class="b-sys" x="536" y="70" width="456" height="120" rx="10"/>
+<text class="t-code" x="552" y="98">mcl_mail_service</text>
+<text class="t-type" x="552" y="116">[:mcl_om_service behaviour]</text>
+<text class="t-desc" x="552" y="140">info, start, stop, health, capabilities and</text>
+<text class="t-desc" x="552" y="156">identity_spec. Seven procedures, each served</text>
+<text class="t-desc" x="552" y="172">under its own grant; scope mcl-mail, 30 days.</text>
+<rect class="b-cmp" x="56" y="230" width="456" height="120" rx="10"/>
+<text class="t-code" x="72" y="258">mcl_mail_store</text>
+<text class="t-type" x="72" y="276">[Erlang module]</text>
+<text class="t-desc" x="72" y="300">Starts mcl_mail_store under MCL_DATA_DIR, waits</text>
+<text class="t-desc" x="72" y="316">until reckon_db lists it, then starts evoq's</text>
+<text class="t-desc" x="72" y="332">per-store subscription (reckon_db ~&gt; 5.11).</text>
+<rect class="b-cmp" x="536" y="230" width="456" height="120" rx="10"/>
+<text class="t-code" x="552" y="258">Seven responders</text>
+<text class="t-type" x="552" y="276">[macula_response, one each]</text>
+<text class="t-desc" x="552" y="300">initiate, open, deposit, reply and archive (in</text>
+<text class="t-desc" x="552" y="316">guide_mailbox_lifecycle); get_mailbox and</text>
+<text class="t-desc" x="552" y="332">get_letter (in query_mailboxes). No topics.</text>
+<rect class="b-cmp" x="56" y="390" width="456" height="120" rx="10"/>
+<text class="t-code" x="72" y="418">mcl_mail_sup</text>
+<text class="t-type" x="72" y="436">[supervisor, one_for_one]</text>
+<text class="t-desc" x="72" y="460">start_link/0, called by Service.start/1.</text>
+<text class="t-desc" x="72" y="476">No children: each department supervises its</text>
+<text class="t-desc" x="72" y="492">own processes and macula spawns a responder.</text>
+<rect class="b-cmp" x="536" y="390" width="456" height="120" rx="10"/>
+<text class="t-code" x="552" y="418">mailbox_citizen</text>
+<text class="t-type" x="552" y="436">[Erlang module]</text>
+<text class="t-desc" x="552" y="460">Who a CALL acts as. macula puts the signing</text>
+<text class="t-desc" x="552" y="476">node id on every CALL; caller/1 reads it and</text>
+<text class="t-desc" x="552" y="492">did/1 takes a DID as 64 hex or 32 raw bytes.</text>
+<rect class="b-cmp" x="56" y="550" width="456" height="120" rx="10"/>
+<text class="t-code" x="72" y="578">guide_mailbox_lifecycle</text>
+<text class="t-type" x="72" y="596">[CMD app, Erlang]</text>
+<text class="t-desc" x="72" y="620">mailbox_aggregate, mailbox_state and nine</text>
+<text class="t-desc" x="72" y="636">desks; one stream per citizen, mailbox-&lt;digest&gt;.</text>
+<text class="t-desc" x="72" y="652">Status is bit flags (mailbox_status.hrl).</text>
+<rect class="b-cmp" x="536" y="550" width="456" height="120" rx="10"/>
+<text class="t-code" x="552" y="578">project_mailboxes</text>
+<text class="t-type" x="552" y="596">[PRJ app, Erlang]</text>
+<text class="t-desc" x="552" y="620">letter_lifecycle_to_mailboxes projects the</text>
+<text class="t-desc" x="552" y="636">four letter events into one document per letter.</text>
+<text class="t-desc" x="552" y="652">Starts before the subscription replays.</text>
+<rect class="b-cmp" x="56" y="710" width="456" height="120" rx="10"/>
+<text class="t-code" x="72" y="738">query_mailboxes</text>
+<text class="t-type" x="72" y="756">[QRY app, Erlang]</text>
+<text class="t-desc" x="72" y="780">get_mailbox and get_letter, read straight</text>
+<text class="t-desc" x="72" y="796">from mailboxes_read_model. Marking a fetched</text>
+<text class="t-desc" x="72" y="812">letter read is folded into both.</text>
+<rect class="b-cmp" x="536" y="710" width="456" height="120" rx="10"/>
+<text class="t-code" x="552" y="738">mailboxes_read_model</text>
+<text class="t-type" x="552" y="756">[barrel_docdb, database mcl_mail]</text>
+<text class="t-desc" x="552" y="780">One document per letter, keyed by the citizen</text>
+<text class="t-desc" x="552" y="796">and the letter id; opened by project_mailboxes</text>
+<text class="t-desc" x="552" y="812">at boot. barrel_docdb ~&gt; 1.5, on rocksdb.</text>
+<rect class="b-mac" x="56" y="870" width="456" height="120" rx="10"/>
+<text class="t-code" x="72" y="898">mcl_om</text>
+<text class="t-type" x="72" y="916">[library, ~&gt; 1.4]</text>
+<text class="t-desc" x="72" y="940">boot/1: loads the identity key, joins the</text>
+<text class="t-desc" x="72" y="956">realm, dials the pinned stations, advertises the</text>
+<text class="t-desc" x="72" y="972">procedures, serves /health on a socket.</text>
+<rect class="b-mac" x="536" y="870" width="456" height="120" rx="10"/>
+<text class="t-code" x="552" y="898">macula SDK</text>
+<text class="t-type" x="552" y="916">[library, ~&gt; 16.0, wire 1.0]</text>
+<text class="t-desc" x="552" y="940">QUIC transport, RPC dispatch to a named</text>
+<text class="t-desc" x="552" y="956">responder, and the caller field every station on</text>
+<text class="t-desc" x="552" y="972">the path verifies before a handler runs.</text>
+<path class="edge" d="M56 130H16V930H56" marker-end="url(#a)"/>
+<text class="t-rel" x="30" y="530" text-anchor="middle" transform="rotate(-90 30 530)">calls mcl_om:boot/1</text>
+<path class="edge" d="M512 130H536" marker-end="url(#a)"/>
+<text class="t-rel" x="524" y="122" text-anchor="middle">boots</text>
+<path class="edge" d="M284 190V230" marker-end="url(#a)"/>
+<text class="t-rel" x="292" y="216">opens, subscribes</text>
+<path class="edge" d="M804 190V230" marker-end="url(#a)"/>
+<text class="t-rel" x="812" y="216">capabilities/0 names 7</text>
+<path class="edge" d="M864 350V390" marker-end="url(#a)"/>
+<text class="t-rel" x="872" y="374">caller, DID</text>
+<path class="edge" d="M536 290H520V530H284V550" marker-end="url(#a)"/>
+<text class="t-rel" x="330" y="546">command, desk</text>
+<path class="edge" d="M512 610H536" marker-end="url(#a)"/>
+<text class="t-rel" x="524" y="602" text-anchor="middle">events</text>
+<path class="edge" d="M864 670V710" marker-end="url(#a)"/>
+<text class="t-rel" x="872" y="694">writes a document</text>
+<path class="edge" d="M512 770H536" marker-end="url(#a)"/>
+<text class="t-rel" x="524" y="762" text-anchor="middle">reads</text>
+<path class="edge" d="M512 930H536" marker-end="url(#a)"/>
+<text class="t-rel" x="524" y="922" text-anchor="middle">dials</text>
+<rect class="b-ext" x="64" y="1040" width="920" height="136" rx="10"/>
+<text class="t-code" x="80" y="1068">Host environment</text>
+<text class="t-type" x="80" y="1086">[read at boot; nothing here is baked into the image]</text>
+<text class="t-desc" x="80" y="1110">MCL_REALM and MCL_REALM_KEY are required: the realm tag and its public key, the trust anchor. MACULA_STATION_SEEDS with</text>
+<text class="t-desc" x="80" y="1126">MACULA_STATION_NODE_IDS is the pinned dial: each seed pairs with its station's node id. MCL_DATA_DIR holds the store, the read model</text>
+<text class="t-desc" x="80" y="1142">and barrel_docdb's system database. MCL_COOKIE and MCL_NODE_NAME name the node; MCL_SERVICE_NAME and MCL_BOX label the boot claim.</text>
+<text class="t-desc" x="64" y="1212">config/sys.config.src sets mesh: required, so a boot missing the realm, its key or the pinned stations stops and names each one.</text>
+<text class="t-desc" x="64" y="1230">The store id, mcl_mail_store, is named in event_store/0 and in the evoq block; a test compares them, and a second asserts the block is there.</text>
+<text class="t-desc" x="64" y="1248">deploy/docker-compose.yml mounts /etc/mcl/secrets for the node key and a host directory on /data, on a bulk drive; a recreate without them loses both.</text>
+<rect class="b-sys" x="24" y="1272" width="22" height="14" rx="3"/>
+<text class="t-leg" x="54" y="1284">In scope</text>
+<rect class="b-per" x="110.8" y="1272" width="22" height="14" rx="3"/>
+<text class="t-leg" x="140.8" y="1284">Person</text>
+<rect class="b-mac" x="184.39999999999998" y="1272" width="22" height="14" rx="3"/>
+<text class="t-leg" x="214.39999999999998" y="1284">Macula infrastructure</text>
+<rect class="b-ext" x="357.0" y="1272" width="22" height="14" rx="3"/>
+<text class="t-leg" x="387.0" y="1284">External system</text>
+<rect class="b-cmp" x="490.0" y="1272" width="22" height="14" rx="3"/>
+<text class="t-leg" x="520.0" y="1284">Container or component</text>
+<rect class="bound" x="669.2" y="1272" width="22" height="14" rx="3"/>
+<text class="t-leg" x="699.2" y="1284">Boundary</text>
+</svg>
