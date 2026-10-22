@@ -23,7 +23,8 @@ read model, and advertises seven procedures of its own under `mcl-mail/*`.
 The service calls nothing outside the mesh: no HTTP client, no SMTP, no database
 server. The store and the letter read model are local files under `MCL_DATA_DIR`. A
 DID is a Macula node id, and macula puts the signing caller on every CALL, so every
-procedure acts as that citizen and nothing in a payload can name another mailbox.
+procedure of the service's own acts as that citizen and nothing in a payload can
+name another mailbox.
 
 ## Level 2: containers and components
 

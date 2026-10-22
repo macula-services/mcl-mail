@@ -210,7 +210,7 @@ def components():
     d.edge("M864 670V710"); d.text("t-rel", 872, 694, "writes a document")
     d.edge("M512 770H536"); d.text("t-rel", 524, 762, "reads", anchor="middle")
     d.edge("M512 930H536"); d.text("t-rel", 524, 922, "dials", anchor="middle")
-    d.box("b-ext", 64, 1040, 920, 136, "Host environment", "[read at boot; MCL_NODE_NAME, MCL_COOKIE and MCL_DATA_DIR have image defaults]",
+    d.box("b-ext", 64, 1040, 920, 136, "Host environment", "[read at boot; MCL_NODE_NAME, MCL_NODE_HOST, MCL_COOKIE and MCL_DATA_DIR have image defaults]",
           ["MCL_REALM and MCL_REALM_KEY are required: the realm tag and its public key, the trust anchor. MACULA_STATION_SEEDS with",
            "MACULA_STATION_NODE_IDS is the pinned dial: each seed pairs with its station's node id. MCL_DATA_DIR holds the store, the read model",
            "and barrel_docdb's system database. MCL_COOKIE and MCL_NODE_NAME name the node; MCL_SERVICE_NAME and MCL_BOX label the boot claim."],

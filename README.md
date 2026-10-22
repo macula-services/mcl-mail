@@ -143,7 +143,8 @@ hold the image there. A push that changes only documentation builds no image
 
 The service's org, the `<org>` its own procedure names carry (`<org>/<name>`), is
 this repository's name, fixed in `config/sys.config.src`. The realm's grant names
-it; without an org mcl_om advertises nothing.
+it; until the realm delegates the org, the service's procedures do not appear on
+the DHT.
 
 Two things CI cannot do for you, both of which have bitten:
 
@@ -151,9 +152,11 @@ Two things CI cannot do for you, both of which have bitten:
    the host with a bare `unauthorized` that names nothing. Check it after the
    first build. On ghcr the `org.opencontainers.image.source` label in the
    Containerfile is what links the package to the repository.
-2. The host needs `MCL_REALM` from its secrets env file, and `MCL_REALM_KEY`,
-   the pinned station pair and `MCL_MAIL_IMAGE_DIGEST` from the box's committed
-   config env in macula-fleet (`mcl-mail-config.env`).
+2. The host needs `MCL_REALM` (the public realm tag), and `MCL_REALM_KEY`, the
+   station seeds each paired with its station's node id, `MCL_BOX` and
+   `MCL_MAIL_DATA` from the box's committed config env in macula-fleet
+   (`mcl-mail-config.env`). The image is pinned by digest in the fleet's compose
+   file for the service.
 
 ## The service contract
 
