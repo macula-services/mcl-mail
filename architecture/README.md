@@ -3,9 +3,8 @@
 *This exists so a reader can see what mcl-mail talks to, and what it is made of,
 without reading it.*
 
-**Status: built and published, not yet pinned by the fleet.** The image is built in CI
-and signed on a `v*` tag, but macula-fleet has no `mcl-mail-config.env` yet, so no box
-runs it. The service boots, opens its own reckon-db store and the barrel_docdb letter
+**Status: built and published.** The image is built in CI and signed on a `v*`
+tag. The service boots, opens its own reckon-db store and the barrel_docdb letter
 read model, and advertises seven procedures of its own under `mcl-mail/*`.
 
 ## Level 1: system context

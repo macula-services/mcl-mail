@@ -151,8 +151,7 @@ Two things CI cannot do for you, both of which have bitten:
    Containerfile is what links the package to the repository.
 2. The host needs `MCL_REALM` from its secrets env file, and `MCL_REALM_KEY`,
    the pinned station pair and `MCL_MAIL_IMAGE_DIGEST` from the box's committed
-   config env in macula-fleet (`mcl-mail-config.env`, which the fleet does not
-   have yet).
+   config env in macula-fleet (`mcl-mail-config.env`).
 
 ## The service contract
 
