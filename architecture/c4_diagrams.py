@@ -141,7 +141,7 @@ def context():
     d.box("b-ext", 690, 30, 270, 120, "macula-fleet", "[External system]",
           ["Pins each signed v* release", "by digest, canary first; no", "tag moves and main deploys nothing"])
     d.box("b-sys", 365, 186, 270, 152, "mcl-mail", "[mcl_om mesh service]",
-          ["Serves 7 procedures under", "mcl-mail/*, each acting as the", "CALL's caller. Its store and",
+          ["Serves 7 own procedures under", "mcl-mail/*, each acting as the", "CALL's caller. Its store and",
            "read model are local files under", "MCL_DATA_DIR; /health is a socket"])
     d.box("b-mac", 365, 430, 270, 120, "macula-realm", "[Macula infrastructure]",
           ["The trust anchor: its public key", "is pinned, its grant names the", "org mcl-mail, and it sees the claim"])

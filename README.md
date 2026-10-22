@@ -30,7 +30,7 @@ A citizen (a person, an agent or a service, anything with a macula node
 identity) keeps a mailbox here. Anyone can leave a letter in it while the
 citizen is offline; the citizen reads, replies and archives when they are back.
 
-Seven request-and-reply procedures, served under the org `mcl-mail`:
+Seven request-and-reply procedures of its own, served under the org `mcl-mail`:
 
 | Procedure | Payload | Reply | Acts on |
 |-----------|---------|-------|---------|

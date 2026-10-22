@@ -6,7 +6,7 @@ without reading it.*
 **Status: built and published, not yet pinned by the fleet.** The image is built in CI
 and signed on a `v*` tag, but macula-fleet has no `mcl-mail-config.env` yet, so no box
 runs it. The service boots, opens its own reckon-db store and the barrel_docdb letter
-read model, and advertises seven procedures under `mcl-mail/*`.
+read model, and advertises seven procedures of its own under `mcl-mail/*`.
 
 ## Level 1: system context
 
@@ -14,7 +14,7 @@ read model, and advertises seven procedures under `mcl-mail/*`.
 
 | Element | Kind | Role |
 | --- | --- | --- |
-| mcl-mail | In scope | Serves 7 procedures under `mcl-mail/*`, each acting as the CALL's caller. Its store and read model are local files under `MCL_DATA_DIR`, and `/health` is a Unix socket, `/run/mcl/health.sock` |
+| mcl-mail | In scope | Serves 7 procedures of its own under `mcl-mail/*`, each acting as the CALL's caller. Its store and read model are local files under `MCL_DATA_DIR`, and `/health` is a Unix socket, `/run/mcl/health.sock` |
 | Citizen | Person | A person, an agent or a service with a Macula node identity. Initiates and opens its mailbox, reads and replies from it, archives letters |
 | Correspondent | Person | Any mesh caller: an agent leaving work for a citizen who is not online right now |
 | macula-fleet | External system | Pins each signed `v*` release by digest, canary first. No tag moves and a push to main deploys nothing |
@@ -33,7 +33,7 @@ procedure acts as that citizen and nothing in a payload can name another mailbox
 | Component | Technology | Responsibility |
 | --- | --- | --- |
 | `mcl_mail_app` | OTP application | `start/2` opens `mcl_mail_store`, then calls `mcl_om:boot(mcl_mail_service)`. mcl_om opens no store from 0.35 on (mcl-om#10) |
-| `mcl_mail_service` | the `mcl_om_service` behaviour | `info/0`, `start/1`, `stop/1`, `health/0`, `capabilities/0`, `identity_spec/0`, plus `event_store/0`. Seven procedures, each served under its own realm grant; scope `mcl-mail`, 30 days, no actions and no resources |
+| `mcl_mail_service` | the `mcl_om_service` behaviour | `info/0`, `start/1`, `stop/1`, `health/0`, `capabilities/0`, `identity_spec/0`, plus `event_store/0`. Seven procedures of its own, each served under a realm grant; scope `mcl-mail`, 30 days, no actions and no resources |
 | `mcl_mail_store` | Erlang module | Starts `mcl_mail_store` under `MCL_DATA_DIR`, waits until `reckon_db` lists it, then starts `evoq`'s per-store subscription, so projections see every event. `reckon_db ~> 5.11`, `evoq ~> 1.26`, `reckon_evoq ~> 2.7` |
 | Seven responders | `macula_response`, one each | `initiate_mailbox`, `open_mailbox`, `deposit_letter`, `reply_to_letter` and `archive_letter` live in `guide_mailbox_lifecycle`; `get_mailbox` and `get_letter` live in `query_mailboxes`. The service publishes and subscribes to no topics |
 | `mcl_mail_sup` | supervisor, `one_for_one` | `start_link/0`, called by `Service.start/1`. No children: each department supervises its own processes and macula spawns a responder per call |
