@@ -56,9 +56,9 @@
 <rect class="b-sys" x="536" y="70" width="456" height="120" rx="10"/>
 <text class="t-code" x="552" y="98">mcl_mail_service</text>
 <text class="t-type" x="552" y="116">[:mcl_om_service behaviour]</text>
-<text class="t-desc" x="552" y="140">info, start, stop, health, capabilities and</text>
-<text class="t-desc" x="552" y="156">identity_spec. Seven procedures, each served</text>
-<text class="t-desc" x="552" y="172">under its own grant; scope mcl-mail, 30 days.</text>
+<text class="t-desc" x="552" y="140">info and get_limits (both open); start, stop,</text>
+<text class="t-desc" x="552" y="156">health, capabilities, identity_spec. Seven procedures of its own,</text>
+<text class="t-desc" x="552" y="172">each under a realm grant; scope mcl-mail, 30 days.</text>
 <rect class="b-cmp" x="56" y="230" width="456" height="120" rx="10"/>
 <text class="t-code" x="72" y="258">mcl_mail_store</text>
 <text class="t-type" x="72" y="276">[Erlang module]</text>

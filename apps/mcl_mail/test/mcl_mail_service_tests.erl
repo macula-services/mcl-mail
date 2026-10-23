@@ -58,8 +58,8 @@ info_version_matches_the_application_test() ->
 health_is_green_test() ->
     ?assertEqual(ok, ?SERVICE:health()).
 
-%% The seven procedures, served as `mcl-mail/<name>' (the org comes from
-%% config). The assertion is here so that adding or dropping one breaks a test
+%% The seven procedures of its own, served as `mcl-mail/<name>' (the org
+%% comes from config). The assertion is here so that adding or dropping one breaks a test
 %% and makes someone write down what the service can now actually do.
 announces_the_seven_mailbox_procedures_test() ->
     ?assertEqual([<<"initiate_mailbox">>, <<"open_mailbox">>, <<"deposit_letter">>,
@@ -67,8 +67,8 @@ announces_the_seven_mailbox_procedures_test() ->
                   <<"get_letter">>],
                  [maps:get(name, C) || C <- ?SERVICE:capabilities()]).
 
-%% Every procedure is request and reply, answered by a module that exists and
-%% implements macula_response.
+%% Every procedure of its own is request and reply, answered by a module
+%% that exists and implements macula_response.
 every_procedure_is_answered_by_a_response_handler_test_() ->
     [?_assert(lists:member(macula_response, behaviours(Handler)))
      || #{handler := {Handler, _Args}} <- ?SERVICE:capabilities()].
@@ -86,8 +86,9 @@ identity_spec_has_the_shape_mcl_om_expects_test() ->
     ?assert(is_integer(Ttl) andalso Ttl > 0).
 
 %% The authority is for topics published and subscribed to, and mcl-mail does
-%% neither: every procedure is a CALL, whose serving grant (D25) the realm
-%% issues per procedure and mcl_om reports on /health. So it asks for nothing.
+%% neither: every procedure of its own is a CALL, whose serving grant (D25)
+%% the realm issues per procedure and mcl_om reports on /health. So it asks
+%% for nothing.
 asks_the_realm_for_no_topic_authority_test() ->
     #{actions := Actions, resources := Resources} = ?SERVICE:identity_spec(),
     ?assertEqual([], Actions),

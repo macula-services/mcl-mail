@@ -168,8 +168,8 @@ def components():
           ["start/2 opens mcl_mail_store, then calls", "mcl_om:boot(mcl_mail_service) to wire the mesh.",
            "mcl_om opens no store from 0.35 (mcl-om#10)."], code=True)
     d.box("b-sys", 536, 70, 456, 120, "mcl_mail_service", "[:mcl_om_service behaviour]",
-          ["info, start, stop, health, capabilities and", "identity_spec. Seven procedures, each served",
-           "under its own grant; scope mcl-mail, 30 days."], code=True)
+          ["info and get_limits (both open); start, stop,", "health, capabilities, identity_spec. Seven procedures of its own,",
+           "each under a realm grant; scope mcl-mail, 30 days."], code=True)
     d.box("b-cmp", 56, 230, 456, 120, "mcl_mail_store", "[Erlang module]",
           ["Starts mcl_mail_store under MCL_DATA_DIR, waits", "until reckon_db lists it, then starts evoq's",
            "per-store subscription (reckon_db ~> 5.11)."], code=True)

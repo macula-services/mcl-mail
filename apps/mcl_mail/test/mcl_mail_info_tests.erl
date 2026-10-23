@@ -1,14 +1,15 @@
 %% @doc `mcl-mail/info', the procedure mcl_om 0.28 answers for this service with
-%% no code of its own: who it is, its versions and what it advertises.
+%% no code of its own, alongside the open `mcl-mail/get_limits' it also answers:
+%% who it is, its versions and what it advertises.
 %%
 %% Built from this service's real info/0, its real capabilities/0 with `info'
-%% added the way mcl_om:boot/2 adds it, and the org in config/sys.config.src,
-%% then sent through macula's own frame codec, the path a reply takes. What
-%% arrives must be text, never bytes, and name this service, its procedures and
-%% an mcl_om of at least 1.4.0 with a macula of at least 16.0.0 (mcl_om 1.4 is
-%% on macula 16, which keeps wire 1.0, the wire the flag day (macula-fleet#27)
-%% moved every service to). Sealing needs kem_advertise, which this service leaves off: its
-%% calls stay in the clear.
+%% and `get_limits' added the way mcl_om:boot/2 adds both, and the org in
+%% config/sys.config.src, then sent through macula's own frame codec, the path
+%% a reply takes. What arrives must be text, never bytes, and name this
+%% service, its procedures and an mcl_om of at least 1.4.0 with a macula of at
+%% least 16.0.0 (mcl_om 1.4 is on macula 16, which keeps wire 1.0, the wire the
+%% flag day (macula-fleet#27) moved every service to). Sealing needs
+%% kem_advertise, which this service leaves off: its calls stay in the clear.
 -module(mcl_mail_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").

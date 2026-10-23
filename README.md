@@ -68,6 +68,9 @@ being for somebody who never asked for one.
 
 ### How it is built
 
+The C4 model is in [architecture/README.md](architecture/README.md): what the
+service talks to, and what it is made of.
+
 An umbrella of four apps, one per department:
 
 - `guide_mailbox_lifecycle` (CMD): the mailbox aggregate, one event-sourced
@@ -126,7 +129,7 @@ image build brings its own:
 `deploy/docker-compose.yml` runs it, a minimal runnable example that carries
 what the service knows about itself. The fleet deploys services from its own
 compose files in macula-fleet, in the same shape: the image by digest, the
-digest from the box's committed config env. If you deploy through something else, let that carry **placement**: which
+digest pinned there by its release workflow. If you deploy through something else, let that carry **placement**: which
 host, which station, which realm, which secret store. Keeping the two apart is
 what stops a config table in a README and the real environment drifting.
 
@@ -134,7 +137,7 @@ what stops a config table in a README and the real environment drifting.
 
 A `v*` tag publishes `ghcr.io/macula-services/mcl-mail:<version>` and nothing else, signed
 by digest with its SBOM and provenance (macula-ci-images' `attest-image.yml`). A push to
-`main` publishes `:main` and `:<sha>`, which nothing follows, and nothing moves `:latest`.
+`main` publishes `:main` and `:<sha>` instead of `:latest`, and nothing follows them.
 The fleet runs a release by digest: macula-fleet's pin-releases workflow finds the signed
 release, verifies it was signed on its tag and pins `<version>@sha256:<digest>`
 (macula-fleet#14, #15), so a green `v*` tag is the deploy. To roll back, revert the pin and
@@ -143,7 +146,7 @@ hold the image there. A push that changes only documentation builds no image
 
 The service's org, the `<org>` its own procedure names carry (`<org>/<name>`), is
 this repository's name, fixed in `config/sys.config.src`. The realm's grant names
-it; without an org mcl_om advertises nothing.
+it; without an org mcl_om refuses to boot, naming the setting.
 
 Two things CI cannot do for you, both of which have bitten:
 
@@ -151,9 +154,11 @@ Two things CI cannot do for you, both of which have bitten:
    the host with a bare `unauthorized` that names nothing. Check it after the
    first build. On ghcr the `org.opencontainers.image.source` label in the
    Containerfile is what links the package to the repository.
-2. The host needs `MCL_REALM` from its secrets env file, and `MCL_REALM_KEY`,
-   the pinned station pair and `MCL_MAIL_IMAGE_DIGEST` from the box's committed
-   config env in macula-fleet (`mcl-mail-config.env`).
+2. The host needs `MCL_REALM` (a public constant in macula-fleet's compose),
+   `MCL_REALM_KEY`, `MCL_BOX` and the station seeds with their matching node
+   ids from the box's committed config env in macula-fleet
+   (`mcl-mail-config.env`), the cookie from its secrets file, and the image
+   by digest in that compose.
 
 ## The service contract
 

@@ -1,11 +1,11 @@
 %% @doc The mcl_om service contract for mcl-mail.
 %%
 %% Async mailboxes: an agent leaves work for a citizen who is not online, and
-%% the citizen reads it when they are. Seven request-and-reply procedures,
-%% registered by mcl_om as `mcl-mail/<name>'. Every one acts as the CALL's
-%% wire-authenticated caller (see `mailbox_citizen'): a citizen initiates,
-%% opens, reads, replies from and archives in their OWN mailbox, and the
-%% sender of a deposited letter is whoever signed the deposit.
+%% the citizen reads it when they are. Seven request-and-reply procedures
+%% of its own, registered by mcl_om as `mcl-mail/<name>'. Every one acts as
+%% the CALL's wire-authenticated caller (see `mailbox_citizen'): a citizen
+%% initiates, opens, reads, replies from and archives in their OWN mailbox,
+%% and the sender of a deposited letter is whoever signed the deposit.
 %%
 %% SIX CALLBACKS, ALL REQUIRED. The store is this service's own: event_store/0
 %% describes it and mcl_mail_app opens it before mcl_om:boot/1 (mcl_om opens
@@ -36,8 +36,8 @@ start(_Opts) -> mcl_mail_sup:start_link().
 stop(_State) -> ok.
 
 %% Nothing of the service's own can fail once its tree is up. Whether callers
-%% can REACH it (each procedure's realm-issued D25 provider grant) is reported
-%% by mcl_om's /health itself, combined with this verdict.
+%% can REACH it (each of its own procedures' realm-issued D25 provider
+%% grant) is reported by mcl_om's /health itself, combined with this verdict.
 health() -> ok.
 
 %% WHAT THIS SERVICE ANNOUNCES IT CAN DO, each entry a promise that something

@@ -18,12 +18,13 @@ read model, and advertises seven procedures of its own under `mcl-mail/*`.
 | Correspondent | Person | Any mesh caller: an agent leaving work for a citizen who is not online right now |
 | macula-fleet | External system | Pins each signed `v*` release by digest, canary first. No tag moves and a push to main deploys nothing |
 | macula-realm | Macula infrastructure | The trust anchor: its public key is pinned as `MCL_REALM_KEY`, its grant names the org `mcl-mail`, and its operator sees this node's boot claim on the Providers desk |
-| Macula stations, mesh DHT | Macula infrastructure | The pinned dial: each seed in `MACULA_STATION_SEEDS` pairs with its node id in `MACULA_STATION_NODE_IDS`, and the DHT takes the capability advertisements |
+| Macula stations, mesh DHT | Macula infrastructure | The pinned dial: each seed in `MACULA_STATION_SEEDS` pairs with its node id in `MACULA_STATION_NODE_IDS`, and the DHT takes the advertisements this node publishes |
 
 The service calls nothing outside the mesh: no HTTP client, no SMTP, no database
 server. The store and the letter read model are local files under `MCL_DATA_DIR`. A
-DID is a Macula node id, and macula puts the signing caller on every CALL, so every
-procedure acts as that citizen and nothing in a payload can name another mailbox.
+DID is a Macula node id, and macula puts the signing caller on every CALL, so each
+of its own procedures acts as that citizen and nothing in a payload can name
+another mailbox.
 
 ## Level 2: containers and components
 
