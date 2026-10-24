@@ -3,7 +3,8 @@
 %% who it is, its versions and what it advertises.
 %%
 %% Built from this service's real info/0, its real capabilities/0 with `info'
-%% and `get_limits' added the way mcl_om:boot/2 adds both, and the org in
+%% added the way mcl_om_info:with_info/1 adds it -- mcl_om adds the open
+%% `get_limits' at boot too, and this path does not exercise that -- and the org in
 %% config/sys.config.src, then sent through macula's own frame codec, the path
 %% a reply takes. What arrives must be text, never bytes, and name this
 %% service, its procedures and an mcl_om of at least 1.4.0 with a macula of at

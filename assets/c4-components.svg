@@ -74,7 +74,7 @@
 <rect class="b-cmp" x="56" y="390" width="456" height="120" rx="10"/>
 <text class="t-code" x="72" y="418">mcl_mail_sup</text>
 <text class="t-type" x="72" y="436">[supervisor, one_for_one]</text>
-<text class="t-desc" x="72" y="460">start_link/0, called by Service.start/1.</text>
+<text class="t-desc" x="72" y="460">start_link/0, called by mcl_mail_service:start/1.</text>
 <text class="t-desc" x="72" y="476">No children: each department supervises its</text>
 <text class="t-desc" x="72" y="492">own processes and macula spawns a responder.</text>
 <rect class="b-cmp" x="536" y="390" width="456" height="120" rx="10"/>

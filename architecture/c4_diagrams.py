@@ -177,7 +177,7 @@ def components():
           ["initiate, open, deposit, reply and archive (in", "guide_mailbox_lifecycle); get_mailbox and",
            "get_letter (in query_mailboxes). No topics."], code=True)
     d.box("b-cmp", 56, 390, 456, 120, "mcl_mail_sup", "[supervisor, one_for_one]",
-          ["start_link/0, called by Service.start/1.", "No children: each department supervises its",
+          ["start_link/0, called by mcl_mail_service:start/1.", "No children: each department supervises its",
            "own processes and macula spawns a responder."], code=True)
     d.box("b-cmp", 536, 390, 456, 120, "mailbox_citizen", "[Erlang module]",
           ["Who a CALL acts as. macula puts the signing", "node id on every CALL; caller/1 reads it and",
