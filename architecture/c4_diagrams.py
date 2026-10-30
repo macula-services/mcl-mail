@@ -194,10 +194,10 @@ def components():
     d.box("b-cmp", 536, 710, 456, 120, "mailboxes_read_model", "[barrel_docdb, database mcl_mail]",
           ["One document per letter, keyed by the citizen", "and the letter id; opened by project_mailboxes",
            "at boot. barrel_docdb ~> 1.5, on rocksdb."], code=True)
-    d.box("b-mac", 56, 870, 456, 120, "mcl_om", "[library, ~> 1.4]",
+    d.box("b-mac", 56, 870, 456, 120, "mcl_om", "[library, ~> 1.6]",
           ["boot/1: loads the identity key, joins the", "realm, dials the pinned stations, advertises the",
            "procedures, serves /health on a socket."], code=True)
-    d.box("b-mac", 536, 870, 456, 120, "macula SDK", "[library, ~> 16.0, wire 1.0]",
+    d.box("b-mac", 536, 870, 456, 120, "macula SDK", "[library, ~> 18.0, wire 1.0]",
           ["QUIC transport, RPC dispatch to a named", "responder, and the caller field every station on",
            "the path verifies before a handler runs."], code=True)
     d.edge("M56 130H16V930H56"); d.text("t-rel", 30, 530, "calls mcl_om:boot/1", anchor="middle", rotate=-90)

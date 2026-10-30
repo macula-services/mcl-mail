@@ -73,6 +73,17 @@ every_procedure_is_answered_by_a_response_handler_test_() ->
     [?_assert(lists:member(macula_response, behaviours(Handler)))
      || #{handler := {Handler, _Args}} <- ?SERVICE:capabilities()].
 
+%% macula 18 asks a handler-bearing capability to say who may call it, and
+%% mcl_om 1.6 refuses the boot of one that does not (macula#147, mcl-om#41).
+%% The refusal happens on a live node at boot, so it would be found by a
+%% station going quiet rather than by a build; asserting it here is what turns
+%% a forgotten policy into a failing test. `open' is the policy these
+%% procedures have always served: the responder confines each operation to the
+%% CALL's own wire-authenticated caller.
+every_procedure_names_who_may_call_it_test() ->
+    ?assertEqual([], [maps:get(name, C) || #{handler := _} = C <- ?SERVICE:capabilities(),
+                                            maps:get(auth, C, none) =:= none]).
+
 behaviours(Module) ->
     {module, Module} = code:ensure_loaded(Module),
     lists:append([B || {behaviour, B} <- Module:module_info(attributes)]).

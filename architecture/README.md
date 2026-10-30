@@ -42,8 +42,8 @@ another mailbox.
 | `project_mailboxes` | PRJ app, Erlang | `letter_lifecycle_to_mailboxes` projects the four letter events into one document per letter. It starts before the subscription replays into it |
 | `query_mailboxes` | QRY app, Erlang | `get_mailbox` and `get_letter`, read straight from `mailboxes_read_model`. Marking a fetched letter read is folded into both, so a mailbox is one round trip |
 | `mailboxes_read_model` | barrel_docdb, database `mcl_mail` | One document per letter, keyed by the citizen and the letter id; opened by `project_mailboxes` at boot. `barrel_docdb ~> 1.5`, on the system librocksdb 11.1.2 |
-| `mcl_om` | library, `~> 1.4` | `boot/1`: loads the identity key, joins the realm, dials the pinned stations, advertises the declared capabilities, serves `/health` on a Unix socket |
-| macula SDK | library, `~> 16.0`, wire 1.0 | QUIC transport, RPC dispatch to a responder that answers by name, and the `caller` field every station on the path verifies before a handler runs |
+| `mcl_om` | library, `~> 1.6` | `boot/1`: loads the identity key, joins the realm, dials the pinned stations, advertises the declared capabilities, serves `/health` on a Unix socket |
+| macula SDK | library, `~> 18.0`, wire 1.0 | QUIC transport, RPC dispatch to a responder that answers by name, and the `caller` field every station on the path verifies before a handler runs |
 | Host environment | read at boot | `MCL_REALM` and `MCL_REALM_KEY` (required), `MACULA_STATION_SEEDS` and `MACULA_STATION_NODE_IDS` (required), `MCL_DATA_DIR`, `MCL_NODE_NAME`, `MCL_NODE_HOST`, `MCL_COOKIE`, `MCL_SERVICE_NAME`, `MCL_BOX` |
 
 `config/sys.config.src` sets `mesh: required`, so a boot missing the realm, its key or

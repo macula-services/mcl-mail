@@ -5,22 +5,46 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.5.0 - 2026-10-30
 
 ### Changed
 
-- **The base library is macula 16** (macula-codebase-checks#4): the macula floor moves
-  `~> 15.6` to `~> 16.0`, and `mcl_om` to `~> 1.4`, the release whose own base is
-  macula 16. 16.0 keeps wire 1.0, so this service still speaks to every wire 1.0 box;
-  what it adds is the revocation bound (macula#118): an endorsement admits its holder
-  for at most 24 hours, and a gated overlay context must pass `member_standing`. This
-  service gates no overlay and issues no endorsement.
+- **The base library is macula 18** (macula-io/macula#147, mcl-om#41): the macula
+  floor moves `~> 16.0` to `~> 18.0`, and `mcl_om` `~> 1.4` to `~> 1.6`, the
+  release whose own base is macula 18. 18 keeps wire 1.0, so this service still
+  speaks to every wire 1.0 box. The macula 16 floor, left Unreleased below, ships
+  here with its revocation bound (macula#118): an endorsement admits its holder
+  for at most 24 hours and a gated overlay context must pass `member_standing`.
+  This service gates no overlay and issues no endorsement.
+
+- **Every procedure names who may call it.** macula 18 asks a handler-bearing
+  capability for an `auth` policy and mcl_om 1.6 refuses to boot one that names
+  none, so without this the service would not have come up at all. All seven name
+  `auth => open`: any identified caller that reaches the mesh may ask, and the
+  responder then confines the operation to the CALL's own wire-authenticated
+  caller — a citizen initiates, opens, reads, replies from and archives in their
+  OWN mailbox, and the sender of a deposited letter is whoever signed the
+  deposit. That is what the service has always served; it is written down now
+  because macula 18 stopped assuming it. A test fails if a procedure is added
+  without a policy, since the boot refusal otherwise shows up as a station going
+  quiet rather than as a build.
+
+- **The responder suites call through the wire** (mcl-om#31). Both now go through
+  `mcl_om_wire_test`: the request is encoded and decoded the way a station does
+  it, the verified caller is merged the way the link merges it, and the reply is
+  put through the check a provider runs before answering. The one case a station
+  cannot produce — a payload that arrives with no caller at all — stays a direct
+  call on purpose. The info round-trip test's sub-dependency floors move from
+  macula 15.6.0 / mcl_om 1.0.0 to 18.0.0 / 1.6.0.
+
+### Fixed
 
 - Every app the release names carries the release version (mcl-mail#7). The desk
   apps sat at 0.3.4 through v0.4.0 while the release tuple said the tag's
   version, so the release guard would refuse the next tag and every box would
   have gone on reporting the older one. `mcl_mail_release_apps_tests` now reads the release tuple,
   every app it names and each app's .app.src, and fails when they disagree.
+  All four app.src files are at 0.5.0 in this release.
 
 ## 0.4.0 - 2026-10-17
 

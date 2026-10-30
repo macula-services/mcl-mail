@@ -28,7 +28,7 @@
 -export([event_store/0]).
 info() ->
     #{name => <<"mcl-mail">>,
-      version => <<"0.4.0">>,
+      version => <<"0.5.0">>,
       description => <<"Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now">>}.
 
 start(_Opts) -> mcl_mail_sup:start_link().
@@ -47,21 +47,31 @@ health() -> ok.
 %% mark_letter_read are tested domain desks with no procedure of their own:
 %% no client needs close or archive yet, and marking read is folded into the
 %% two reads.
+%%
+%% EVERY PROCEDURE NAMES `auth => open', which macula 18 requires of a
+%% handler-bearing capability (macula#147, mcl-om#41: mcl_om 1.6 refuses to
+%% boot one that names none). The policy is what the service has always done,
+%% now written down rather than assumed: any identified caller that reaches
+%% the mesh may ask, and the responder then confines the operation to the
+%% CALL's own wire-authenticated caller (`mailbox_citizen'). Who may touch a
+%% given mailbox is decided inside the handler, where the caller is proof of a
+%% private key; a policy naming callers at the link could only ever be
+%% coarser than that.
 capabilities() ->
     [#{name => <<"initiate_mailbox">>, version => 1,
-       handler => {initiate_mailbox_responder, []}},
+       handler => {initiate_mailbox_responder, []}, auth => open},
      #{name => <<"open_mailbox">>, version => 1,
-       handler => {open_mailbox_responder, []}},
+       handler => {open_mailbox_responder, []}, auth => open},
      #{name => <<"deposit_letter">>, version => 1,
-       handler => {deposit_letter_responder, []}},
+       handler => {deposit_letter_responder, []}, auth => open},
      #{name => <<"reply_to_letter">>, version => 1,
-       handler => {reply_to_letter_responder, []}},
+       handler => {reply_to_letter_responder, []}, auth => open},
      #{name => <<"archive_letter">>, version => 1,
-       handler => {archive_letter_responder, []}},
+       handler => {archive_letter_responder, []}, auth => open},
      #{name => <<"get_mailbox">>, version => 1,
-       handler => {get_mailbox_by_citizen_responder, []}},
+       handler => {get_mailbox_by_citizen_responder, []}, auth => open},
      #{name => <<"get_letter">>, version => 1,
-       handler => {get_letter_by_id_responder, []}}].
+       handler => {get_letter_by_id_responder, []}, auth => open}].
 
 %% THE AUTHORITY THIS SERVICE ASKS THE REALM FOR, and deliberately nothing more.
 %% Ask for exactly the topics you publish and subscribe to. mcl-mail publishes
