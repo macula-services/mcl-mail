@@ -5,6 +5,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.0 - 2026-10-30
+
+- **On macula 18 / mcl_om 1.6** (`mcl_om ~> 1.0` -> `~> 1.6`, `macula ~> 15.6`
+  -> `~> 18.0`) (macula-io/macula#147, mcl-om#41). 18 keeps wire 1.0, so this
+  build still speaks to every wire 1.0 box.
+- **Every procedure names who may call it.** macula 18 asks a handler-bearing
+  capability for an `auth` policy and mcl_om 1.6 refuses to boot one that names
+  none, so without this the service would not have come up at all. All seven
+  name `auth => open`: any identified caller that reaches the mesh may ask, and
+  the responder then confines the operation to the CALL's own
+  wire-authenticated caller — a citizen initiates, opens, reads, replies from
+  and archives in their OWN mailbox, and the sender of a deposited letter is
+  whoever signed the deposit. That is what the service has always served; the
+  policy is now written down instead of assumed, because macula 18 stopped
+  assuming it.
+- A test now fails if a procedure is added without a policy, since the boot
+  refusal otherwise shows up as a station going quiet rather than as a build.
+- The leftover `[Unreleased]` line about the macula 14.8.2 rebuild is folded in
+  here; that rebuild shipped in 0.4.0's flag day, which is the SDK base this
+  entry moves on from.
+
 ## 0.4.0 - 2026-10-17
 
 - **Wire 1.0: on macula 15.6 and mcl_om 1.0** (macula-fleet#27). macula 15 neither reads a 14 node's frames nor completes a handshake with it, so the fleet moves across in one flag day rather than node by node. mcl_om 1.0 is this service on the new wire: no function it calls moved or changed arity. `mcl_om ~> 0.x` takes any 0.x, so a 0.43 on macula 15 would have rolled the live 0.10.3 fleet on its next build; it names 1.0, which is outside that range.
@@ -16,10 +37,6 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## 0.3.3 - 2026-10-14
 
 - **Rebuilt on mcl_om 0.40** (mcl-om#25): a lapsed provider delegation claims again and comes back without a restart, and `/health` shows each authorization's `not_after_ms`, degraded as `expiring` with a third or less of its life left.
-
-## [Unreleased]
-
-- **Rebuilt on macula 14.8.2** (refused dials back off further each time, macula#95).
 
 ## [0.3.1] - 2026-10-10
 

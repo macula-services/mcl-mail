@@ -5,10 +5,10 @@
 %% added the way mcl_om:boot/2 adds it, and the org in config/sys.config.src,
 %% then sent through macula's own frame codec, the path a reply takes. What
 %% arrives must be text, never bytes, and name this service, its procedures and
-%% an mcl_om of at least 1.0.0 with a macula of at least 15.6.0 (mcl_om 1.0 is
-%% on macula 15, the stable wire the flag day (macula-fleet#27) moves every
-%% service to). Sealing needs kem_advertise, which this service leaves off: its
-%% calls stay in the clear.
+%% an mcl_om of at least 1.6.0 with a macula of at least 18.0.0 (mcl_om 1.6 is
+%% on macula 18, the SDK line macula-io/macula#147's caller and source rules
+%% arrive with; 18 keeps wire 1.0). Sealing needs kem_advertise, which this
+%% service leaves off: its calls stay in the clear.
 -module(mcl_mail_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -28,13 +28,14 @@ info_round_trip_test_() ->
           ?_assertEqual([{text, C} || C <- [<<(?ORG)/binary, "/info">> | Own]],
                         maps:get(capabilities, Reply)),
           ?_assertEqual([], [V || V <- lists:flatten(maps:values(Reply)), is_binary(V)]),
-          ?_assert(at_least(maps:get(mcl_om_version, Reply), [1, 0, 0])),
-          ?_assert(at_least(maps:get(macula_version, Reply), [15, 6, 0]))]
+          ?_assert(at_least(maps:get(mcl_om_version, Reply), [1, 6, 0])),
+          ?_assert(at_least(maps:get(macula_version, Reply), [18, 0, 0]))]
      end}.
 
-%% A floor, not an exact release: the constraints (~> 1.0, ~> 15.6) take any
+%% A floor, not an exact release: the constraints (~> 1.6, ~> 18.0) take any
 %% later release they allow. Same major, and major.minor.patch at least the
-%% floor's.
+%% floor's. The floor is the point: asserted below what the constraints allow,
+%% this passes on a build the service cannot boot against.
 at_least({text, Vsn}, [Major | _] = Floor) ->
     [Ma | _] = Parts = [binary_to_integer(P) || P <- binary:split(Vsn, <<".">>, [global])],
     Ma =:= Major andalso lists:sublist(Parts, 3) >= Floor.
