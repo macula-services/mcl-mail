@@ -12,9 +12,10 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **The base library is macula 18** (macula-io/macula#147, mcl-om#41): the macula
   floor moves `~> 16.0` to `~> 18.0`, and `mcl_om` `~> 1.4` to `~> 1.6`, the
   release whose own base is macula 18. 18 keeps wire 1.0, so this service still
-  speaks to every wire 1.0 box. The macula 16 floor, left Unreleased below, ships
-  here with its revocation bound (macula#118): an endorsement admits its holder
-  for at most 24 hours and a gated overlay context must pass `member_standing`.
+  speaks to every wire 1.0 box. The macula 16 revocation bound, which never got
+  a release line of its own, ships here (macula#118): an endorsement admits its
+  holder for at most 24 hours and a gated overlay context must pass
+  `member_standing`.
   This service gates no overlay and issues no endorsement.
 
 - **Every procedure names who may call it.** macula 18 asks a handler-bearing
