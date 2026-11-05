@@ -61,9 +61,12 @@ health() -> ok.
 %% EVERY PROCEDURE IS `confidential => required' (mcl-mail#14). `auth' decides
 %% who may ask; `confidential' decides who can read the bytes on the way. A
 %% caller seals its request to the KEM key the advertisement names, or the
-%% provider refuses it `sealed_required', so no letter, recipient or mailbox
-%% listing crosses a station in the clear. This needs `kem_advertise' in
-%% config/sys.config.src: mcl_om refuses to boot `required' without it.
+%% provider refuses it `sealed_required' and runs nothing, so no answer ever
+%% leaves in the clear. A clear request's own bytes have already crossed the
+%% stations by then: transit protection of a request is the caller's
+%% `confidential => required' (README, "Who can read a letter"). This needs
+%% `kem_advertise' in config/sys.config.src: mcl_om refuses to boot `required'
+%% without it.
 capabilities() ->
     [sealed(<<"initiate_mailbox">>, initiate_mailbox_responder),
      sealed(<<"open_mailbox">>, open_mailbox_responder),

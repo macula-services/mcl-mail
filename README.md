@@ -68,13 +68,30 @@ being for somebody who never asked for one.
 
 ### Who can read a letter
 
-**On the way, nobody but the two ends.** Every procedure is
-`confidential => required`, and the service names its ML-KEM key in each
-advertisement (`kem_advertise`). A caller seals its request to that key, and the
-answer comes back sealed. A call in the clear is refused with `sealed_required`,
-so a letter, its recipient and a mailbox listing never cross a station in the
-clear. Ask your client for the seal report (`sealed: 1`) to see it for a given
-call.
+**The answers are always sealed. A request is sealed only if its caller seals
+it.** Every procedure is `confidential => required`, and the service names its
+ML-KEM key in each advertisement (`kem_advertise`). A caller that seals its
+request to that key gets a sealed answer, and no station on the path can read
+either. A request that arrives in the clear is refused with `sealed_required`:
+the handler never runs and nothing is answered in the clear. But that request,
+with the letter's subject, body and recipient in it, **has already crossed every
+station on the way to the provider**. The provider cannot un-send it. So whether
+a deposit is protected in transit is the CALLER's choice:
+
+- A caller that passes `confidential: "required"` (crew-code's crew mail does)
+  never sends a mailbox request in the clear. A provider that names no key is
+  refused before anything is sent.
+- A caller on the default `"preferred"` (macula-mcp's `mesh_call` today, and the
+  TypeScript SDK's default) seals whenever the advertisement it holds names a
+  key. It goes out in the clear when that advertisement is keyless, which
+  includes a stale 0.5.0 advertisement still within its lifetime for up to ten
+  minutes after this release rolls. The provider then refuses it, and a caller
+  with A0 reseals and retries, but the clear copy has already travelled.
+  macula-io/macula-mcp#76 asks for `"required"` as the default.
+- A client on an SDK older than macula 13 cannot seal at all. Every request it
+  sends crosses in the clear and is refused.
+
+Ask your client for the seal report (`sealed: 1`) to see it for a given call.
 
 What sealing does not hide, stated so nobody assumes otherwise:
 

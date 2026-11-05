@@ -87,10 +87,11 @@
     %% believe it had chosen a difficulty that nothing reads.
     %%
     %% ⚠ MAIL IS SEALED (mcl-mail#14). `kem_advertise' makes every
-    %% advertisement name this node's ML-KEM key, so a caller seals a letter,
-    %% and the mailbox it fetches, end to end, and a relaying station passes
-    %% on only ciphertext. The seven mailbox procedures are `required' and
-    %% refuse a clear call, and mcl_om refuses to boot `required' without this
+    %% advertisement name this node's ML-KEM key, so a caller can seal a
+    %% letter, and the mailbox it fetches, end to end. The seven mailbox
+    %% procedures are `required': a clear request is refused and nothing is
+    %% answered in the clear (its own bytes have crossed the stations by then;
+    %% see the README). mcl_om refuses to boot `required' without this
     %% switch. It is a property of the service, so it is a literal here and
     %% not a per-box variable.
     {macula, [

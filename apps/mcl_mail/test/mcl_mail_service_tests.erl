@@ -84,8 +84,8 @@ every_procedure_names_who_may_call_it_test() ->
     ?assertEqual([], [maps:get(name, C) || #{handler := _} = C <- ?SERVICE:capabilities(),
                                             maps:get(auth, C, none) =:= none]).
 
-%% Every procedure refuses a clear call (mcl-mail#14), so a letter, its
-%% recipient and a mailbox listing never cross a station in the clear. A
+%% Every procedure refuses a clear call (mcl-mail#14), so no letter, recipient
+%% or mailbox listing is ever answered in the clear. A
 %% procedure added without `required' fails here by name. mcl_om accepts the set
 %% under the shipped kem_advertise switch, as it does at boot, and refuses it
 %% without: `required' with no key to name would be unreachable, so the two

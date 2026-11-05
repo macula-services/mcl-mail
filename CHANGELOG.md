@@ -9,14 +9,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Security
 
-- **Mail is sealed, and a call in the clear is refused** (#14). The service now
-  names its ML-KEM key in every advertisement (`kem_advertise` enabled), and all
-  seven mailbox procedures are `confidential => required`. A caller seals its
-  deposit, reply or fetch to that key, and a station on the path relays only
-  ciphertext. A clear call is refused with `sealed_required`, so a client that
-  cannot seal can no longer use mail. That is the point: until now, every
-  letter's subject, body and recipient was readable by each station that relayed
-  it. `mcl-mail/info` and `mcl-mail/get_limits` belong to mcl_om and stay
+- **Mail is answered only sealed, and a request in the clear is refused** (#14).
+  The service now names its ML-KEM key in every advertisement (`kem_advertise`
+  enabled), and all seven mailbox procedures are `confidential => required`. A
+  caller that seals its deposit, reply or fetch to that key gets a sealed
+  answer, and a station on the path relays only ciphertext. A request in the
+  clear is refused with `sealed_required` and its handler never runs. Its bytes
+  have still crossed the stations, though, so protection in transit needs the
+  caller to pass `confidential: "required"`. The README says which callers do
+  today. Until now every letter's subject, body and recipient, and every
+  mailbox listing, was readable by each station that relayed it.
+  `mcl-mail/info` and `mcl-mail/get_limits` belong to mcl_om and stay
   `preferred`.
 - What sealing does not cover is now stated in the README ("Who can read a
   letter"): routing metadata, the plaintext store on the box that runs the
@@ -24,7 +27,10 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Tests: every procedure is `required`, and a new one without it fails by name.
   mcl_om's boot verdict accepts the set with the switch and refuses it without.
   macula's own advertise decision gives each procedure a keyed, clear-refusing
-  spec. The baked release config enables `kem_advertise`.
+  spec. The baked release config enables `kem_advertise`. They test the
+  configuration macula acts on, not a link: macula exposes no provider-link seam
+  outside its own TEST build (macula-io/macula#198). The live check after the
+  release is the end-to-end proof.
 
 ## 0.5.0 - 2026-10-30
 
