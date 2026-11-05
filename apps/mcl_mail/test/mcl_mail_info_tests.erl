@@ -9,8 +9,10 @@
 %% a reply takes. What arrives must be text, never bytes, and name this
 %% service, its procedures and an mcl_om of at least 1.6.0 with a macula of at
 %% least 18.0.0 (mcl_om 1.6 is on macula 18, which keeps wire 1.0, the wire the
-%% flag day (macula-fleet#27) moved every service to). Sealing needs
-%% kem_advertise, which this service leaves off: its calls stay in the clear.
+%% flag day (macula-fleet#27) moved every service to). `info' is mcl_om's,
+%% advertised with no mode of its own: under the shipped kem_advertise switch it
+%% names the KEM key as `preferred', so a caller that can seal does, while the
+%% seven mailbox procedures are `required' (mcl-mail#14).
 -module(mcl_mail_info_tests).
 
 -include_lib("eunit/include/eunit.hrl").

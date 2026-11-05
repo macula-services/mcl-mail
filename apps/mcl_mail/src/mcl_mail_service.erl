@@ -28,7 +28,7 @@
 -export([event_store/0]).
 info() ->
     #{name => <<"mcl-mail">>,
-      version => <<"0.5.0">>,
+      version => <<"0.6.0">>,
       description => <<"Async mailboxes for the Macula mesh: an agent leaves work for a citizen who is not online right now">>}.
 
 start(_Opts) -> mcl_mail_sup:start_link().
@@ -57,21 +57,25 @@ health() -> ok.
 %% given mailbox is decided inside the handler, where the caller is proof of a
 %% private key; a policy naming callers at the link could only ever be
 %% coarser than that.
+%%
+%% EVERY PROCEDURE IS `confidential => required' (mcl-mail#14). `auth' decides
+%% who may ask; `confidential' decides who can read the bytes on the way. A
+%% caller seals its request to the KEM key the advertisement names, or the
+%% provider refuses it `sealed_required', so no letter, recipient or mailbox
+%% listing crosses a station in the clear. This needs `kem_advertise' in
+%% config/sys.config.src: mcl_om refuses to boot `required' without it.
 capabilities() ->
-    [#{name => <<"initiate_mailbox">>, version => 1,
-       handler => {initiate_mailbox_responder, []}, auth => open},
-     #{name => <<"open_mailbox">>, version => 1,
-       handler => {open_mailbox_responder, []}, auth => open},
-     #{name => <<"deposit_letter">>, version => 1,
-       handler => {deposit_letter_responder, []}, auth => open},
-     #{name => <<"reply_to_letter">>, version => 1,
-       handler => {reply_to_letter_responder, []}, auth => open},
-     #{name => <<"archive_letter">>, version => 1,
-       handler => {archive_letter_responder, []}, auth => open},
-     #{name => <<"get_mailbox">>, version => 1,
-       handler => {get_mailbox_by_citizen_responder, []}, auth => open},
-     #{name => <<"get_letter">>, version => 1,
-       handler => {get_letter_by_id_responder, []}, auth => open}].
+    [sealed(<<"initiate_mailbox">>, initiate_mailbox_responder),
+     sealed(<<"open_mailbox">>, open_mailbox_responder),
+     sealed(<<"deposit_letter">>, deposit_letter_responder),
+     sealed(<<"reply_to_letter">>, reply_to_letter_responder),
+     sealed(<<"archive_letter">>, archive_letter_responder),
+     sealed(<<"get_mailbox">>, get_mailbox_by_citizen_responder),
+     sealed(<<"get_letter">>, get_letter_by_id_responder)].
+
+sealed(Name, Responder) ->
+    #{name => Name, version => 1, handler => {Responder, []},
+      auth => open, confidential => required}.
 
 %% THE AUTHORITY THIS SERVICE ASKS THE REALM FOR, and deliberately nothing more.
 %% Ask for exactly the topics you publish and subscribe to. mcl-mail publishes

@@ -5,6 +5,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.0 - 2026-11-05
+
+### Security
+
+- **Mail is sealed, and a call in the clear is refused** (#14). The service now
+  names its ML-KEM key in every advertisement (`kem_advertise` enabled), and all
+  seven mailbox procedures are `confidential => required`. A caller seals its
+  deposit, reply or fetch to that key, and a station on the path relays only
+  ciphertext. A clear call is refused with `sealed_required`, so a client that
+  cannot seal can no longer use mail. That is the point: until now, every
+  letter's subject, body and recipient was readable by each station that relayed
+  it. `mcl-mail/info` and `mcl-mail/get_limits` belong to mcl_om and stay
+  `preferred`.
+- What sealing does not cover is now stated in the README ("Who can read a
+  letter"): routing metadata, the plaintext store on the box that runs the
+  service, and an untrusted sender's text.
+- Tests: every procedure is `required`, and a new one without it fails by name.
+  mcl_om's boot verdict accepts the set with the switch and refuses it without.
+  macula's own advertise decision gives each procedure a keyed, clear-refusing
+  spec. The baked release config enables `kem_advertise`.
+
 ## 0.5.0 - 2026-10-30
 
 ### Changed

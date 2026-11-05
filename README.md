@@ -66,6 +66,28 @@ A deposit needs the recipient's mailbox to be initiated and open. Nothing
 opens a mailbox on a citizen's behalf, so a stranger cannot bring a mailbox into
 being for somebody who never asked for one.
 
+### Who can read a letter
+
+**On the way, nobody but the two ends.** Every procedure is
+`confidential => required`, and the service names its ML-KEM key in each
+advertisement (`kem_advertise`). A caller seals its request to that key, and the
+answer comes back sealed. A call in the clear is refused with `sealed_required`,
+so a letter, its recipient and a mailbox listing never cross a station in the
+clear. Ask your client for the seal report (`sealed: 1`) to see it for a given
+call.
+
+What sealing does not hide, stated so nobody assumes otherwise:
+
+- **Routing.** A station still sees the procedure name, the caller's node id,
+  the sizes and the timing: who uses mail and when, though not what they wrote.
+- **The box that runs mcl-mail.** Letters are stored in plaintext in its event
+  store and read model, so whoever operates that box can read every mailbox it
+  holds. Encrypting a letter to its recipient is a separate design.
+- **The sender's intent.** Anyone on the realm can leave a letter in an open
+  mailbox. The sender is whoever signed the deposit and cannot be forged, but
+  what they wrote is untrusted. A client shows a letter's body as data, never
+  as instructions.
+
 ### How it is built
 
 The C4 model is in [architecture/README.md](architecture/README.md): what the

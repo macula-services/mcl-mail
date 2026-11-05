@@ -84,6 +84,45 @@ every_procedure_names_who_may_call_it_test() ->
     ?assertEqual([], [maps:get(name, C) || #{handler := _} = C <- ?SERVICE:capabilities(),
                                             maps:get(auth, C, none) =:= none]).
 
+%% Every procedure refuses a clear call (mcl-mail#14), so a letter, its
+%% recipient and a mailbox listing never cross a station in the clear. A
+%% procedure added without `required' fails here by name. mcl_om accepts the set
+%% under the shipped kem_advertise switch, as it does at boot, and refuses it
+%% without: `required' with no key to name would be unreachable, so the two
+%% settings stand or fall together.
+every_procedure_refuses_a_clear_call_test() ->
+    Caps = ?SERVICE:capabilities(),
+    ?assertEqual([], [maps:get(name, C) || C <- Caps, maps:get(confidential, C, absent) =/= required]),
+    ?assertEqual(ok, mcl_om_capabilities:confidentiality_verdict(Caps, enabled)),
+    ?assertMatch({error, {mcl_om_confidential_required_without_kem_advertise, _}},
+                 mcl_om_capabilities:confidentiality_verdict(Caps, disabled)).
+
+%% What macula itself makes of each capability under the shipped switch: the
+%% advertisement spec names the KEM key and `confidential => required', the spec
+%% macula_station_link's clear-call admission refuses `sealed_required' on. This
+%% is macula's own decision function, the one the pool's ADVERTISE runs, so a
+%% capability field macula reads differently than this service means fails here.
+macula_advertises_every_procedure_keyed_and_clear_refused_test_() ->
+    {setup,
+     fun() -> ok = application:set_env(macula, kem_advertise, shipped_kem_advertise()) end,
+     fun(_) -> application:unset_env(macula, kem_advertise) end,
+     [?_assertEqual({Name, {ok, #{kem => true, confidential => required}}},
+                    {Name, macula:advertise_confidentiality(C)})
+      || #{name := Name} = C <- ?SERVICE:capabilities()]}.
+
+%% The switch the release ships, read out of the baked config itself (every
+%% ${VAR} filled with a dummy and the file parsed), so a release that dropped the
+%% line would fail here and not answer every call in the clear on the box.
+the_release_names_its_kem_key_test() ->
+    ?assertEqual(enabled, shipped_kem_advertise()).
+
+shipped_kem_advertise() ->
+    {ok, Text} = file:read_file(alongside("config/sys.config.src")),
+    Filled = re:replace(Text, <<"\\$\\{[A-Z_]+\\}">>, <<"0">>, [global, {return, list}]),
+    {ok, Tokens, _} = erl_scan:string(Filled),
+    {ok, Config} = erl_parse:parse_term(Tokens),
+    proplists:get_value(kem_advertise, proplists:get_value(macula, Config, []), disabled).
+
 behaviours(Module) ->
     {module, Module} = code:ensure_loaded(Module),
     lists:append([B || {behaviour, B} <- Module:module_info(attributes)]).
