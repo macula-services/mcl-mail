@@ -78,15 +78,17 @@ with the letter's subject, body and recipient in it, **has already crossed every
 station on the way to the provider**. The provider cannot un-send it. So whether
 a deposit is protected in transit is the CALLER's choice:
 
-- A caller that passes `confidential: "required"` (crew-code's crew mail does)
-  never sends a mailbox request in the clear. A provider that names no key is
-  refused before anything is sent.
+- A caller that passes `confidential: "required"` never sends a mailbox
+  request in the clear. A provider that names no key is refused before anything
+  is sent. crew-code's crew mail is not built yet (macula-io/macula-sponsors#315)
+  and must pass `"required"` on every mail call when it is.
 - A caller on the default `"preferred"` (macula-mcp's `mesh_call` today, and the
   TypeScript SDK's default) seals whenever the advertisement it holds names a
   key. It goes out in the clear when that advertisement is keyless, which
   includes a stale 0.5.0 advertisement still within its lifetime for up to ten
-  minutes after this release rolls. The provider then refuses it, and a caller
-  with A0 reseals and retries, but the clear copy has already travelled.
+  minutes after this release rolls. The provider then refuses it, and the
+  refusal carries no key, so the call keeps failing until the caller fetches a
+  fresh advertisement. Either way the clear copy has already travelled.
   macula-io/macula-mcp#76 asks for `"required"` as the default.
 - A client on an SDK older than macula 13 cannot seal at all. Every request it
   sends crosses in the clear and is refused.
